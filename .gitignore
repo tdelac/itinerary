@@ -1,2 +1,8 @@
 # Modules and libraries
 node_modules/
+
+# Data folder
+data/
+
+# Java backupfiles
+*.java~
