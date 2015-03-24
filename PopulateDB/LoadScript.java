@@ -51,8 +51,12 @@ public class LoadScript {
 	
 	public static void fillTables() throws JsonSyntaxException, IOException {
 		
-		FileReader f_business = new FileReader("data/yelp_academic_dataset_business.json");
-		FileReader f_review = new FileReader("data/yelp_academic_dataset_review.json");
+		String data_path = new java.io.File( "../data" ).getCanonicalPath();
+		
+
+		
+		FileReader f_business = new FileReader(data_path + "/yelp_academic_dataset_business.json");
+		FileReader f_review = new FileReader(data_path + "/yelp_academic_dataset_review.json");
 		
 		
 		
