@@ -18,7 +18,7 @@ public class ConnectionDriver {
     private Statement stmt  = null;
     private Connection conn = null;
 
-    public ConnectionDriver() throws SecurityException{
+    public ConnectionDriver() throws SecurityException {
         try {
             Class.forName(DRIVER);
 
