@@ -86,7 +86,7 @@ public class ConnectionDriver {
         return ret;
     }
 
-    public void executeUpdate(String sql) {
+    public void executeInsert(String sql) {
         try {
             stmt.executeUpdate(sql);
         } catch (SQLException e) {
@@ -100,10 +100,26 @@ public class ConnectionDriver {
         }
     }
 
-    public void executeUpdate(Collection<String> sqlSet) {
+    public void executeInsert(Collection<String> sqlSet) {
         for (String sql : sqlSet) {
-            executeUpdate(sql);
+            executeInsert(sql);
         }
+    }
+
+    public void executeCreate(String sql) {
+        executeInsert(sql);
+    }
+
+    public void executeCreate(Collection<String> sqlSet) {
+        executeInsert(sqlSet);
+    }
+
+    public void executeDrop(String sql) {
+        executeInsert(sql);
+    }
+
+    public void executeDrop(Collection<String> sqlSet) {
+        executeInsert(sqlSet);
     }
 
     public void close() {
@@ -121,5 +137,6 @@ public class ConnectionDriver {
 
     public static void main(String[] args) {
         ConnectionDriver test = new ConnectionDriver();
+        test.close();
     }
 }

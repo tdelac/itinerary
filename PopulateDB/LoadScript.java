@@ -13,6 +13,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,27 +31,95 @@ java -cp .:gson-2.3.1.jar LoadScript
 
 public class LoadScript {
 
-
+  private static ConnectionDriver dbConnect = null;
 
 
 	public static void main(String[] args) throws JsonSyntaxException, IOException {
 		
-		// db connection code here
+		//dbConnect = new ConnectionDriver();
 		
-		createTables();
+		//createTables();
 		fillTables();
 
-		
-		
-		// remember to close connection
-
+	  //dbConnect.close();	
 	}
 
 
 	public static void createTables() {
+
+		List<String> createQueries = new ArrayList<String>();
 		
-		
-		return;
+		/* itinerary table */
+		createQueries.add(
+		    "CREATE TABLE Itinerary ("
+		    + "itinerary_id INTEGER PRIMARY KEY,"
+		    + "start_date DATE,"
+		    + "end_date DATE,"
+		    + "total_cost INTEGER)");
+
+    /* Business table */
+		createQueries.add(
+		    "CREATE TABLE Business ("
+		    + "business_id VARCHAR(22) PRIMARY KEY,"
+		    + "latitude DECIMAL,"
+		    + "longitude DECIMAL,"
+		    + "name VARCHAR(30),"
+		    + "stars DECIMAL,"
+		    + "review_count INTEGER)");
+
+		 /* business_review table */
+		 createQueries.add(
+		    "CREATE TABLE business_review ("
+		    + "review_id VARCHAR(22),"
+		    + "stars INTEGER,"
+		    + "review_date DATE,"
+		    + "votes INTEGER,"
+		    + "business_id VARCHAR(22),"
+		    + "PRIMARY KEY (review_id, business_id),"
+		    + "FOREIGN KEY (business_id) REFERENCES Business(business_id) ON DELETE CASCADE)");
+
+		 /* business_hours table */
+		 createQueries.add(
+		    "CREATE TABLE Business_hours ("
+		    + "day CHAR(2),"
+		    + "open TIMESTAMP,"
+		    + "close TIMESTAMP,"
+		    + "business_id VARCHAR(22),"
+		    + "PRIMARY KEY (business_id, day),"
+		    + "FOREIGN KEY (business_id) REFERENCES Business(business_id) ON DELETE CASCADE)");
+
+		 /* Landmark table */
+     createQueries.add(
+        "CREATE TABLE Landmark ("
+        + "business_id VARCHAR(22) PRIMARY KEY,"
+        + "categories VARCHAR(50),"
+        + "FOREIGN KEY (business_id) REFERENCES Business(business_id) ON DELETE CASCADE)");
+
+     /* Restaurant tabe */
+     createQueries.add(
+        "CREATE TABLE Restaurant ("
+        + "business_id VARCHAR(22) PRIMARY KEY,"
+        + "breakfast NUMBER(1),"
+        + "brunch NUMBER(1),"
+        + "lunch NUMBER(1),"
+        + "dinner NUMBER(1),"
+        + "dessert NUMBER(1),"
+        + "latenight NUMBER(1),"
+        + "FOREIGN KEY (business_id) REFERENCES Business(business_id) ON DELETE CASCADE)");
+
+     /* itinerary_business table */
+     createQueries.add(
+        "CREATE TABLE Itinerary_business ("
+        + "itinerary_id INTEGER,"
+        + "business_id VARCHAR(22),"
+        + "start_time TIMESTAMP,"
+        + "end_time TIMESTAMP,"
+        + "PRIMARY KEY (itinerary_id, business_id),"
+        + "FOREIGN KEY (itinerary_id) REFERENCES Itinerary(itinerary_id),"
+        + "FOREIGN KEY (business_id) REFERENCES Business(business_id))");
+
+     /* Run all create queries */
+     dbConnect.executeCreate(createQueries);
 	}
 
 	
@@ -134,11 +204,11 @@ public class LoadScript {
 			//create insert statement strings
 			String review_insert = 
 			    "insert into business_review values " 
-			  + review_id.toString() + ", "  
-			  + stars.toString() + ", "  
-			  + date.toString() + ", " 
-			  + useful.toString() + ", " 
-			  + business_id.toString();
+			  + review_id.toString().replaceAll("\"", "'") + ", "  
+			  + stars.toString().replaceAll("\"", "'") + ", "  
+			  + date.toString().replaceAll("\"", "'") + ", " 
+			  + useful.toString().replaceAll("\"", "'") + ", " 
+			  + business_id.toString().replaceAll("\"", "'");
 			
 			
 			
@@ -204,7 +274,7 @@ public class LoadScript {
 					JsonObject goodFor = attributes.get("Good For").getAsJsonObject();
 					Set<Map.Entry<String,JsonElement>> map_set = goodFor.entrySet();
 					for(Map.Entry<String,JsonElement> m : map_set) {
-						if(m.getValue().toString().equals("true"))
+						if(m.getValue().toString().replaceAll("\"", "'").equals("true"))
 							meals.put(m.getKey(), "TRUE");		
 					}
 				}
@@ -216,7 +286,7 @@ public class LoadScript {
 				
 				String restaurant_insert = 
 				    "insert into Restaurant values (" 
-				  + business_id.toString() + ", " 
+				  + business_id.toString().replaceAll("\"", "'") + ", " 
 				  + meals.get("breakfast") + ", " 
 				  + meals.get("brunch") + ", " 
 				  + meals.get("lunch") + ", " 
@@ -234,7 +304,7 @@ public class LoadScript {
 				//concatenate all categories of a landmark into a single string separated by a *
 				String landmark_categories = "";
 				for(JsonElement j : categories) {
-					String j_str = j.toString();
+					String j_str = j.toString().replaceAll("\"", "'");
 					landmark_categories += j_str.substring(1,j_str.length() - 1) + "*";
 				}
 				
@@ -242,7 +312,7 @@ public class LoadScript {
 				
 				String landmark_insert = 
 				    "insert into Landmark values (" 
-				  + business_id.toString() + ", " 
+				  + business_id.toString().replaceAll("\"", "'") + ", " 
 				  + landmark_categories + ")";
 				
 				//*************REPLACE THIS PRINT STATEMENT WITH ACTUAL SQL STATEMENT EXECUTION*****************
@@ -256,12 +326,12 @@ public class LoadScript {
 			
 			String business_insert = 
 			    "insert into Business values (" 
-			  + business_id.toString() + ", " 
-			  + latitude.toString() + ", " 
-			  + longitude.toString() + ", " 
-			  + name.toString() + ", " 
-			  + stars.toString() + ", " 
-			  + review_count.toString() +  ", " 
+			  + business_id.toString().replaceAll("\"", "'") + ", " 
+			  + latitude.toString().replaceAll("\"", "'") + ", " 
+			  + longitude.toString().replaceAll("\"", "'") + ", " 
+			  + name.toString().replaceAll("\"", "'") + ", " 
+			  + stars.toString().replaceAll("\"", "'") + ", " 
+			  + review_count.toString().replaceAll("\"", "'") +  ", " 
 			  + type + ")";
 			
 			//*************REPLACE THIS PRINT STATEMENT WITH ACTUAL SQL STATEMENT EXECUTION*****************
@@ -275,28 +345,28 @@ public class LoadScript {
 			JsonObject hours = business.get("hours").getAsJsonObject();
 			
 			//if the hours value is not the empty list..."{}". Wonder if there's a better way to do this check..
-			if(hours.toString().length() != 2) {
+			if(hours.toString().replaceAll("\"", "'").length() != 2) {
 				
 				Set<Map.Entry<String,JsonElement>> map_set = hours.entrySet();
 				
 				for(Map.Entry<String,JsonElement> m : map_set) {
 					String weekday_abbrev = "";
-					if(m.getKey().toString().equals("Monday")) {
+					if(m.getKey().toString().replaceAll("\"", "'").equals("Monday")) {
 						weekday_abbrev = "M";
 					}
-					else if(m.getKey().toString().equals("Tuesday")) {
+					else if(m.getKey().toString().replaceAll("\"", "'").equals("Tuesday")) {
 						weekday_abbrev = "Tu";
 					}
-					else if(m.getKey().toString().equals("Wednesday")) {
+					else if(m.getKey().toString().replaceAll("\"", "'").equals("Wednesday")) {
 						weekday_abbrev = "W";
 					}
-					else if(m.getKey().toString().equals("Thursday")) {
+					else if(m.getKey().toString().replaceAll("\"", "'").equals("Thursday")) {
 						weekday_abbrev = "Th";
 					}
-					else if(m.getKey().toString().equals("Friday")) {
+					else if(m.getKey().toString().replaceAll("\"", "'").equals("Friday")) {
 						weekday_abbrev = "F";
 					}
-					else if(m.getKey().toString().equals("Saturday")) {
+					else if(m.getKey().toString().replaceAll("\"", "'").equals("Saturday")) {
 						weekday_abbrev = "Sa";
 					}
 					else {
@@ -308,8 +378,8 @@ public class LoadScript {
 					
 					JsonObject day = m.getValue().getAsJsonObject();
 					JsonObject open_close = m.getValue().getAsJsonObject();
-					String open = open_close.get("open").toString();
-					String close = open_close.get("close").toString();
+					String open = open_close.get("open").toString().replaceAll("\"", "'");
+					String close = open_close.get("close").toString().replaceAll("\"", "'");
 					
 					
 					String hours_insert = 
@@ -317,7 +387,7 @@ public class LoadScript {
 					  + weekday_abbrev + "\", TIMESTAMP_TO(" 
 					  + open + ", HH24:MI), TIMESTAMP_TO(" 
 					  + close + ", HH24:MI), " 
-					  + business_id.toString() + ")";
+					  + business_id.toString().replaceAll("\"", "'") + ")";
 					
 					
 					//*************REPLACE THIS PRINT STATEMENT WITH ACTUAL SQL STATEMENT EXECUTION*****************
