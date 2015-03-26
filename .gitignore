@@ -9,3 +9,6 @@ data/
 
 # Compiler output
 *.class
+
+# Credentials file
+PopulateDB/login.txt
