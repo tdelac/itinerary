@@ -56,8 +56,8 @@ public class LoadScript {
 	
 	public static void fillTables() throws JsonSyntaxException, IOException {
 		
-		//String data_path = new java.io.File( "../data" ).getCanonicalPath();
-		String data_path = new java.io.File( "./data" ).getCanonicalPath();
+		String data_path = new java.io.File( "../data" ).getCanonicalPath();
+		//String data_path = new java.io.File( "./data" ).getCanonicalPath();
 
 		
 		FileReader f_business = new FileReader(data_path + "/yelp_academic_dataset_business.json");
@@ -132,7 +132,13 @@ public class LoadScript {
 
 
 			//create insert statement strings
-			String review_insert = "insert into business_review values " + review_id.toString() + ", "  + stars.toString() + ", "  + date.toString() + ", " + useful.toString() + ", " + business_id.toString();
+			String review_insert = 
+			    "insert into business_review values " 
+			  + review_id.toString() + ", "  
+			  + stars.toString() + ", "  
+			  + date.toString() + ", " 
+			  + useful.toString() + ", " 
+			  + business_id.toString();
 			
 			
 			
@@ -208,7 +214,15 @@ public class LoadScript {
 				type = "Restaurants";
 				
 				
-				String restaurant_insert = "insert into Restaurant values (" + business_id.toString() + ", " + meals.get("breakfast") + ", " + meals.get("brunch") + ", " + meals.get("lunch") + ", " + meals.get("dinner") + ", " + meals.get("dessert") + ", " + meals.get("latenight") + ")";
+				String restaurant_insert = 
+				    "insert into Restaurant values (" 
+				  + business_id.toString() + ", " 
+				  + meals.get("breakfast") + ", " 
+				  + meals.get("brunch") + ", " 
+				  + meals.get("lunch") + ", " 
+				  + meals.get("dinner") + ", " 
+				  + meals.get("dessert") + ", " 
+				  + meals.get("latenight") + ")";
 				
 				//*************REPLACE THIS PRINT STATEMENT WITH ACTUAL SQL STATEMENT EXECUTION*****************
 				
@@ -226,7 +240,10 @@ public class LoadScript {
 				
 				landmark_categories = "\"" + landmark_categories + "\"";
 				
-				String landmark_insert = "insert into Landmark values (" + business_id.toString() + ", " + landmark_categories + ")";
+				String landmark_insert = 
+				    "insert into Landmark values (" 
+				  + business_id.toString() + ", " 
+				  + landmark_categories + ")";
 				
 				//*************REPLACE THIS PRINT STATEMENT WITH ACTUAL SQL STATEMENT EXECUTION*****************
 				
@@ -237,7 +254,15 @@ public class LoadScript {
 			
 			
 			
-			String business_insert = "insert into Business values (" + business_id.toString() + ", " + latitude.toString() + ", " + longitude.toString() + ", " + name.toString() + ", " + stars.toString() + ", " + review_count.toString() +  ", " + type + ")";
+			String business_insert = 
+			    "insert into Business values (" 
+			  + business_id.toString() + ", " 
+			  + latitude.toString() + ", " 
+			  + longitude.toString() + ", " 
+			  + name.toString() + ", " 
+			  + stars.toString() + ", " 
+			  + review_count.toString() +  ", " 
+			  + type + ")";
 			
 			//*************REPLACE THIS PRINT STATEMENT WITH ACTUAL SQL STATEMENT EXECUTION*****************
 			
@@ -287,7 +312,12 @@ public class LoadScript {
 					String close = open_close.get("close").toString();
 					
 					
-					String hours_insert = "insert into Business_hours values (" + "\"" + weekday_abbrev + "\"" + ", " + "TIMESTAMP_TO(" + open + ", HH24:MI), " + "TIMESTAMP_TO(" + close + ", HH24:MI), " +  business_id.toString() + ")";
+					String hours_insert = 
+					    "insert into Business_hours values (\"" 
+					  + weekday_abbrev + "\", TIMESTAMP_TO(" 
+					  + open + ", HH24:MI), TIMESTAMP_TO(" 
+					  + close + ", HH24:MI), " 
+					  + business_id.toString() + ")";
 					
 					
 					//*************REPLACE THIS PRINT STATEMENT WITH ACTUAL SQL STATEMENT EXECUTION*****************
