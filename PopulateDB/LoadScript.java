@@ -279,7 +279,7 @@ public class LoadScript {
 		
 		
 		
-
+		System.out.println();
 		System.out.println("FILLING IN REVIEW TABLE...");
 		
 
