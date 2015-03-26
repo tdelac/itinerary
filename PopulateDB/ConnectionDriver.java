@@ -3,10 +3,6 @@ import java.util.Collection;
 
 public class ConnectionDriver {
     static final String DRIVER = "oracle.jdbc.driver.OracleDriver";
-    static final String URL = "jdbc:oracle:thin@//mycis550db.c0zcgg5oelhe.us-west-2.rds.amazonaws.com:1521/MYDB";
-
-    static final String USER = "cis550nalt";
-    static final String PASS = "cis550nalt";
 
     private Statement stmt  = null;
     private Connection conn = null;
