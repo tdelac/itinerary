@@ -124,12 +124,16 @@ public class LoadScript {
 			JsonElement stars = business.get("stars");
 			JsonElement review_count = business.get("review_count");
 			JsonArray categories = business.get("categories").getAsJsonArray();
-
+			
+			String business_insert = "insert into Business values (" + business_id.toString() + ", " + latitude.toString() + ", " + longitude.toString() + ", " + name.toString() + ", " + stars.toString() + ", " + review_count.toString() + ")";
+			
+			System.out.println(business_insert);
+			
 			String type = "Landmark";
 
 
-
-
+			String business_type_insert = "";
+			
 			//code to fill in restaurant table as well as specify type for business table
 			if(categories.contains(new JsonPrimitive("Restaurants"))) {
 
@@ -161,10 +165,10 @@ public class LoadScript {
 
 
 				String restaurant_insert = "insert into Restaurant values (" + business_id.toString() + ", " + meals.get("breakfast") + ", " + meals.get("brunch") + ", " + meals.get("lunch") + ", " + meals.get("dinner") + ", " + meals.get("dessert") + ", " + meals.get("latenight") + ")";
-
-				//*************REPLACE THIS PRINT STATEMENT WITH ACTUAL SQL STATEMENT EXECUTION*****************
-
+				
 				System.out.println(restaurant_insert);
+				
+				
 
 			}
 			else {
@@ -180,22 +184,24 @@ public class LoadScript {
 
 				String landmark_insert = "insert into Landmark values (" + business_id.toString() + ", " + landmark_categories + ")";
 
-				//*************REPLACE THIS PRINT STATEMENT WITH ACTUAL SQL STATEMENT EXECUTION*****************
-
+				
 				System.out.println(landmark_insert);
+				
 
 
 			}
 
 
 
-			String business_insert = "insert into Business values (" + business_id.toString() + ", " + latitude.toString() + ", " + longitude.toString() + ", " + name.toString() + ", " + stars.toString() + ", " + review_count.toString() +  ", " + type + ")";
-
+			
+			
+			
+			
 			//*************REPLACE THIS PRINT STATEMENT WITH ACTUAL SQL STATEMENT EXECUTION*****************
 
-			System.out.println(business_insert);
+			
 
-
+			
 
 
 			//fill in hours table
@@ -279,7 +285,7 @@ public class LoadScript {
 		
 		
 		
-
+		System.out.println();
 		System.out.println("FILLING IN REVIEW TABLE...");
 		
 
