@@ -50,9 +50,9 @@ public class LoadScript {
         List<String> dropQueries = new ArrayList<String>();
 
         dropQueries.add(
-            "DROP TABLE Itinerary");
+            "DROP TABLE Itinerary_business");
         dropQueries.add(
-            "DROP TABLE Business");
+            "DROP TABLE Itinerary");
         dropQueries.add(
             "DROP TABLE business_review");
         dropQueries.add(
@@ -62,7 +62,7 @@ public class LoadScript {
         dropQueries.add(
             "DROP TABLE Restaurant");
         dropQueries.add(
-            "DROP TABLE Itinerary_business");
+            "DROP TABLE Business");
 
         System.out.print("Dropping tables...");
         dbConnect.executeDrop(dropQueries);
@@ -152,6 +152,7 @@ public class LoadScript {
 
 	public static void fillTables() throws JsonSyntaxException, IOException {
 
+    System.out.print("Filling tables...");
 		String data_path = new java.io.File( "../data" ).getCanonicalPath();
 		//String data_path = new java.io.File( "./data" ).getCanonicalPath();
 
@@ -170,7 +171,7 @@ public class LoadScript {
 
 
 		// ************* USE THIS CODE TO RUN ON TEST FILE WHICH IS FIRST TWO LINES OF REAL FILES **********
-		final int NUM_ENTRIES = 10;
+		final int NUM_ENTRIES = 1000;
 
 		BufferedReader br_temp_business = new BufferedReader(f_business);
 		BufferedReader br_temp_review = new BufferedReader(f_review);
