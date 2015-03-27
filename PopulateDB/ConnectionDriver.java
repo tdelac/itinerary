@@ -16,6 +16,7 @@ public class ConnectionDriver {
     static final String DRIVER = "oracle.jdbc.driver.OracleDriver";
 
     private Connection conn = null;
+    private Statement glblStmt = null;
 
     public ConnectionDriver() throws SecurityException {
         try {
@@ -29,6 +30,8 @@ public class ConnectionDriver {
             }
             conn = DriverManager.getConnection(creds[0], creds[1], creds[2]);
             System.out.println("Connection made.");
+
+            glblStmt = conn.createStatement();
         } catch (SQLException e) {
             e.printStackTrace();
             try {
@@ -83,6 +86,39 @@ public class ConnectionDriver {
         return ret;
     }
 
+    public void addBatch(String sql) {
+        try {
+          if (glblStmt == null) {
+            glblStmt = conn.createStatement();
+          }         
+          glblStmt.addBatch(sql);
+        } catch (SQLException e) {
+          e.printStackTrace();
+            try {
+              glblStmt.close();
+              conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        } 
+    }
+
+    public void executeBatch() {
+        try {
+          glblStmt.executeBatch();
+          glblStmt.close();
+          glblStmt = null;
+        } catch (SQLException e) {
+          e.printStackTrace();
+            try {
+              glblStmt.close();
+              conn.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        } 
+    }
+
     public void executeInsert(String sql) {
         Statement stmt = null; 
         try {
@@ -125,6 +161,7 @@ public class ConnectionDriver {
     public void close() {
         try {
             if (conn != null) { conn.close(); }
+            if (glblStmt != null) { glblStmt.close(); }
         } catch (SQLException e) {
             e.printStackTrace();
         }

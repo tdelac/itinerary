@@ -156,8 +156,6 @@ public class LoadScript {
 
 	public static void fillTables() throws JsonSyntaxException, IOException {
 
-    int lnCounter = 0;
-    double time = System.currentTimeMillis();
     System.out.print("Filling tables...");
 
 		String data_path = new java.io.File( "../data" ).getCanonicalPath();
@@ -178,7 +176,7 @@ public class LoadScript {
 
 
 		// ************* USE THIS CODE TO RUN ON TEST FILE WHICH IS FIRST TWO LINES OF REAL FILES **********
-		final int NUM_ENTRIES = 1000;
+		final int NUM_ENTRIES = 100;
 
 		BufferedReader br_temp_business = new BufferedReader(f_business);
 		BufferedReader br_temp_review = new BufferedReader(f_review);
@@ -197,14 +195,14 @@ public class LoadScript {
 		//**************************************************************************************************
 
 
+    String toplevelQuery = "insert all ";
+    String reviewQuery = "insert all ";
 		String line;
 
 		//System.out.println();
 		//System.out.println("FILLING IN BUSINESS, RESTAURANT, LANDMARK AND BUSINESS_HOURS TABLES...");
 
-
 		//fills in rest of tables
-		
 		while((line = br_business.readLine()) != null) {
 
 			JsonElement jelement = new JsonParser().parse(line);
@@ -235,9 +233,9 @@ public class LoadScript {
 			  + review_count.toString().replaceAll("'", "").replaceAll("\"", "'")  + ")";
 			
 
+      dbConnect.addBatch(business_insert);
 			//System.out.println(business_insert);
-      dbConnect.executeInsert(business_insert);
-			
+			//toplevelQuery += business_insert + " ";
 
 			String type = "Landmark";
 
@@ -256,7 +254,7 @@ public class LoadScript {
 				meals.put("brunch", "0");
 
 
-				//if attributes has a "good for" key (which is almost always does), iterate through the good for json and fill in the hash map accordingly
+				//if attributes has a "ood for" key (which is almost always does), iterate through the good for json and fill in the hash map accordingly
 
 				JsonObject attributes =  business.get("attributes").getAsJsonObject();
 				if(attributes.has("Good For")) {
@@ -280,11 +278,10 @@ public class LoadScript {
 				  + meals.get("dessert") + ", " 
 				  + meals.get("latenight") + ")";
 				
-				dbConnect.executeInsert(restaurant_insert);
+				dbConnect.addBatch(restaurant_insert);
 				//System.out.println(restaurant_insert);
+				//toplevelQuery += restaurant_insert + " ";
 				
-				
-
 			}
 			else {
 
@@ -303,8 +300,9 @@ public class LoadScript {
 				  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ", " 
 				  + landmark_categories + ")";
 				
+				dbConnect.addBatch(landmark_insert);
 				//System.out.println(landmark_insert);
-				dbConnect.executeInsert(landmark_insert);
+				//toplevelQuery += landmark_insert + " ";
 				
 			}
 
@@ -357,45 +355,29 @@ public class LoadScript {
 					  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ")";
 
 
-                    dbConnect.executeInsert(hours_insert);
+          dbConnect.addBatch(hours_insert);
+          //toplevelQuery += hours_insert + " ";
 					//System.out.println(hours_insert);
 				}
 
 
 			}
 
-			lnCounter++;
-
-			if (lnCounter % 100 == 0) {
-			  System.out.print("Currently executing line: ");
-			  System.out.println(lnCounter);
-      }
-
-			/*
-			DDL CHANGES:
-			votes becomes useful
-			INCLUDE review_count in business table
-			restaurant has breakfast brunch lunch dinner dessert late_night boolean attributes
-			landmark has category attribute which is a string of categories ex: "Nightlife*Comedy Clubs"...VARCHAR(50) should be good enough
-			timestamp not time
-
-			 */
-
-			//ALSO GOTTA FIGURE OUT IF INSERT STIRNGS SHOULD HAVE SEMICOLON AT END OR NOT
-
 
 		}
-		
-		
-		
 		
 		//System.out.println();
 		//System.out.println("FILLING IN REVIEW TABLE...");
 		
+    double time = System.currentTimeMillis();
+    dbConnect.executeBatch();
+	  //dbConnect.executeInsert(toplevelQuery);
 
+		time = System.currentTimeMillis() - time;
+    DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
+    String timeElapsedBusiness = formatter.format(time);
 
 		//fills in review entity
-
 		while((line = br_review.readLine()) != null) {
 
 
@@ -427,24 +409,26 @@ public class LoadScript {
 			  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ")";
 
 
-      dbConnect.executeInsert(review_insert);
+      dbConnect.addBatch(review_insert);
+      //reviewQuery += review_insert + " ";
 			//System.out.println(review_insert); 
 			
-      lnCounter++;
-
-	    if (lnCounter % 100 == 0) {
-	      System.out.print("Currently executing line: ");
-			  System.out.println(lnCounter);
-      }
-
 		}
 
-		time = System.currentTimeMillis() - time;
-    DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
-    String timeElapsed = formatter.format(time);
+	  toplevelQuery += "select 1 from dual";
+	  reviewQuery += "select 1 from dual";
+    
+    double time1 = System.currentTimeMillis();
+    dbConnect.executeBatch();
+	  //dbConnect.executeInsert(reviewQuery);
+
+	  time = System.currentTimeMillis() - time1;
+    formatter = new SimpleDateFormat("mm:ss:SSS");
+    String timeElapsedReview = formatter.format(time);
 
 		System.out.println(" done.");
-		System.out.println("Time elapsed: " + timeElapsed);
+		System.out.println("Time elapsed for business stuff: " + timeElapsedBusiness);
+		System.out.println("Time elapsed for review stuff: " + timeElapsedReview);
 
 	}
 
