@@ -15,7 +15,6 @@ import java.util.Collection;
 public class ConnectionDriver {
     static final String DRIVER = "oracle.jdbc.driver.OracleDriver";
 
-    private Statement stmt  = null;
     private Connection conn = null;
 
     public ConnectionDriver() throws SecurityException {
@@ -30,8 +29,6 @@ public class ConnectionDriver {
             }
             conn = DriverManager.getConnection(creds[0], creds[1], creds[2]);
             System.out.println("Connection made.");
-
-            stmt = conn.createStatement();
         } catch (SQLException e) {
             e.printStackTrace();
             try {
@@ -87,8 +84,11 @@ public class ConnectionDriver {
     }
 
     public void executeInsert(String sql) {
+        Statement stmt = null; 
         try {
+            stmt = conn.createStatement();
             stmt.executeUpdate(sql);
+            stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
             try {
@@ -123,11 +123,6 @@ public class ConnectionDriver {
     }
 
     public void close() {
-        try {
-            if (stmt != null) { stmt.close(); }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         try {
             if (conn != null) { conn.close(); }
         } catch (SQLException e) {

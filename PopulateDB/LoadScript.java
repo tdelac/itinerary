@@ -17,6 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.lang.Math;
 
 
 /*
@@ -87,7 +91,7 @@ public class LoadScript {
 		    + "business_id VARCHAR(22) PRIMARY KEY,"
 		    + "latitude DECIMAL,"
 		    + "longitude DECIMAL,"
-		    + "name VARCHAR(50),"
+		    + "name VARCHAR(30),"
 		    + "stars DECIMAL,"
 		    + "review_count INTEGER)");
 
@@ -116,7 +120,7 @@ public class LoadScript {
          createQueries.add(
              "CREATE TABLE Landmark ("
              + "business_id VARCHAR(22) PRIMARY KEY,"
-             + "categories VARCHAR(200),"
+             + "categories VARCHAR(50),"
              + "FOREIGN KEY (business_id) REFERENCES Business(business_id) ON DELETE CASCADE)");
 
          /* Restaurant tabe */
@@ -152,7 +156,10 @@ public class LoadScript {
 
 	public static void fillTables() throws JsonSyntaxException, IOException {
 
+    int lnCounter = 0;
+    double time = System.currentTimeMillis();
     System.out.print("Filling tables...");
+
 		String data_path = new java.io.File( "../data" ).getCanonicalPath();
 		//String data_path = new java.io.File( "./data" ).getCanonicalPath();
 
@@ -192,8 +199,8 @@ public class LoadScript {
 
 		String line;
 
-		System.out.println();
-		System.out.println("FILLING IN BUSINESS, RESTAURANT, LANDMARK AND BUSINESS_HOURS TABLES...");
+		//System.out.println();
+		//System.out.println("FILLING IN BUSINESS, RESTAURANT, LANDMARK AND BUSINESS_HOURS TABLES...");
 
 
 		//fills in rest of tables
@@ -212,19 +219,24 @@ public class LoadScript {
 			JsonElement stars = business.get("stars");
 			JsonElement review_count = business.get("review_count");
 			JsonArray categories = business.get("categories").getAsJsonArray();
+
+			String nameParsed = name.toString().replaceAll("'", ""); 
+			if (nameParsed.length() > 30) {
+			  nameParsed = nameParsed.substring(0, 30) + "'";
+      }
 			
 			String business_insert = 
 			    "insert into Business values (" 
 			  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ", " 
 			  + latitude.toString().replaceAll("'", "").replaceAll("\"", "'") + ", " 
 			  + longitude.toString().replaceAll("'", "").replaceAll("\"", "'")  + ", " 
-			  + name.toString().replaceAll("'", "").replaceAll("\"", "'")  + ", " 
+			  + nameParsed.replaceAll("\"", "'")  + ", " 
 			  + stars.toString().replaceAll("'", "").replaceAll("\"", "'")  + ", " 
 			  + review_count.toString().replaceAll("'", "").replaceAll("\"", "'")  + ")";
 			
 
-            dbConnect.executeInsert(business_insert);
-			System.out.println(business_insert);
+			//System.out.println(business_insert);
+      dbConnect.executeInsert(business_insert);
 			
 
 			String type = "Landmark";
@@ -269,7 +281,7 @@ public class LoadScript {
 				  + meals.get("latenight") + ")";
 				
 				dbConnect.executeInsert(restaurant_insert);
-				System.out.println(restaurant_insert);
+				//System.out.println(restaurant_insert);
 				
 				
 
@@ -283,6 +295,7 @@ public class LoadScript {
 					landmark_categories += j_str.substring(1,j_str.length() - 1) + "*";
 				}
 
+        landmark_categories = landmark_categories.substring(0, Math.min(landmark_categories.length(), 50));
 				landmark_categories = "'" + landmark_categories + "'";
 
 				String landmark_insert = 
@@ -290,8 +303,8 @@ public class LoadScript {
 				  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ", " 
 				  + landmark_categories + ")";
 				
+				//System.out.println(landmark_insert);
 				dbConnect.executeInsert(landmark_insert);
-				System.out.println(landmark_insert);
 				
 			}
 
@@ -345,13 +358,18 @@ public class LoadScript {
 
 
                     dbConnect.executeInsert(hours_insert);
-					System.out.println(hours_insert);
+					//System.out.println(hours_insert);
 				}
 
 
 			}
 
+			lnCounter++;
 
+			if (lnCounter % 100 == 0) {
+			  System.out.print("Currently executing line: ");
+			  System.out.println(lnCounter);
+      }
 
 			/*
 			DDL CHANGES:
@@ -371,8 +389,8 @@ public class LoadScript {
 		
 		
 		
-		System.out.println();
-		System.out.println("FILLING IN REVIEW TABLE...");
+		//System.out.println();
+		//System.out.println("FILLING IN REVIEW TABLE...");
 		
 
 
@@ -409,10 +427,24 @@ public class LoadScript {
 			  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ")";
 
 
-            dbConnect.executeInsert(review_insert);
-			System.out.println(review_insert); 
+      dbConnect.executeInsert(review_insert);
+			//System.out.println(review_insert); 
+			
+      lnCounter++;
+
+	    if (lnCounter % 100 == 0) {
+	      System.out.print("Currently executing line: ");
+			  System.out.println(lnCounter);
+      }
 
 		}
+
+		time = System.currentTimeMillis() - time;
+    DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
+    String timeElapsed = formatter.format(time);
+
+		System.out.println(" done.");
+		System.out.println("Time elapsed: " + timeElapsed);
 
 	}
 

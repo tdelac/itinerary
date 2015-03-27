@@ -10,5 +10,8 @@ data/
 # Compiler output
 *.class
 
+# Log files
+log.txt
+
 # Credentials file
 PopulateDB/login.txt
