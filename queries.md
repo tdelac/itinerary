@@ -4,12 +4,12 @@
 ##Getting relevant tables:
 
 with RTT as (
-select table_name from dba_tables where owner=@NAME)
+select table_name from dba_tables where owner=**@NAME**)
 select column_name, table_name from all_tab_columns atc where exists (select * from RTT where atc.table_name = RTT.table_name)
 
 
 #respose data:
-
+```
 TABLE_NAME
 ------------------------------
 ITINERARY
@@ -28,7 +28,9 @@ TABLE_NAME
 ------------------------------
 TEMP_BUSINESS_REVIEW
 
+```
 
+```
 
 COLUMN_NAME		       TABLE_NAME
 ------------------------------ ------------------------------
@@ -103,12 +105,13 @@ BUSINESS_ID		       TEMP_LANDMARK
 COLUMN_NAME		       TABLE_NAME
 ------------------------------ ------------------------------
 CATEGORIES		       TEMP_LANDMARK
-
+```
 
 
 
 
 ##Possible input cities and (lat,long):
+```
 Las Vegas, NV           (36.169941,-115.139830)
 Phoenix, AZ             (33.448377,-112.074037)
 Madison, WI             (43.073052,-89.401230)
@@ -119,7 +122,7 @@ Waterloo, Canada        (43.464258,-80.520410)
 Montreal, Canada        (45.501689,-73.567256)
 Edinburgh, UK           (55.953252,-3.188267)
 Karlsruhe, Germany      (49.006890,8.403653)
-
+```
 
 
 Either: we use the cities table or we take the user input and use an api to find the latitude and longitude
@@ -143,15 +146,22 @@ ACOS(SIN(PI()*@lat1/180.0)*SIN(PI()*@lat2/180.0)+COS(PI()*@lat1/180.0)*COS(PI()*
 for this example we use  (49.506890,8.008653)
 
 ##Rank businesses based on their closeness
-
+```
 with closest_business as (
-select business_id, name, (ACOS(SIN(3.14*b.latitude/180.0)*SIN(3.14*49.506890/180.0)+COS(3.14*b.latitude/180.0)*COS(3.14*49.506890/180.0)*COS(3.14*b.longitude/180.0-3.14*8.008653/180.0))) as distance
+select business_id, name, (ACOS(SIN(3.14*b.latitude/180.0)*SIN(3.14*49.506890/180.0)+COS(3.14*b.latitude/180.0)*COS(3.14*49.506890/180.0)*COS(3.14*8.008653/180.0-3.14*b.longitude/180.0))) as distance
 from business b
 order by distance asc)
-
-Get closest meal (substitute specific **@Meal**)
+```
+##Get closest meal (substitute specific **@Meal** or meals)
+```
 select name
 from closest_business
 where **@Meal** = 1
-
-Rank businesses based on their closeness
+```
+##Get closest landmarks
+```
+select name
+from closest_business cb
+inner join landmark l on cb.business_id = l.business_id
+```
+    
