@@ -2,11 +2,11 @@
 
 
 ##Getting relevant tables:
-
+```
 with RTT as (
 select table_name from dba_tables where owner=**@NAME**)
 select column_name, table_name from all_tab_columns atc where exists (select * from RTT where atc.table_name = RTT.table_name)
-
+```
 
 #respose data:
 ```
@@ -129,20 +129,24 @@ Either: we use the cities table or we take the user input and use an api to find
 
 
 #####Case 1: We create a table for cities:
-
+```
 CREATE TABLE CITY
 (CITYID integer,CITY_NAME varchar(255),latitude DECIMAL,longitude DECIMAL, PRIMARY KEY(CITYID));
+```
 
 Insertion example:
+```
 INSERT INTO CITY (CITYID,CITY_NAME,latitude,longitude)
 VALUES (10,'Karlsruhe, Germany',49.006890,8.403653);
-
+```
 
 #####Case 2: We are given an input **@lat**,**@long**
 
 distance between two (lat/long) points is:
+```
 ACOS(SIN(PI()*@lat1/180.0)*SIN(PI()*@lat2/180.0)+COS(PI()*@lat1/180.0)*COS(PI()*@lat2/180.0)*COS(PI()*@lon2/180.0-PI()*@lon1/180.0))*6371
-
+```
+    
 for this example we use  (49.506890,8.008653)
 
 ##Rank businesses based on their closeness
