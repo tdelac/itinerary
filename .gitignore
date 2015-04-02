@@ -15,3 +15,10 @@ log.txt
 
 # Credentials file
 PopulateDB/login.txt
+
+# Emacs autosave/recover
+*~
+*#
+
+# Mac OS
+.DS_Store
