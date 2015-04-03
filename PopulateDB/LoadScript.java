@@ -36,17 +36,21 @@ java -cp .:gson-2.3.1.jar LoadScript
 public class LoadScript {
 
   private static ConnectionDriver dbConnect = null;
+  private static int curMax= 0;
 
 
 	public static void main(String[] args) throws JsonSyntaxException, IOException {
+
+	  curMax = Integer.parseInt(args[0]) + 500;
+	  System.out.println(curMax);
 		
 		dbConnect = new ConnectionDriver();
 		
-		dropTables();
-		createTables();
+		//dropTables();
+		//createTables();
 		fillTables();
 
-	    dbConnect.close();	
+	  dbConnect.close();	
 	}
 
 	public static void dropTables() {
@@ -89,10 +93,10 @@ public class LoadScript {
 		createQueries.add(
 		    "CREATE TABLE Business ("
 		    + "business_id VARCHAR(22) PRIMARY KEY,"
-		    + "latitude DECIMAL,"
-		    + "longitude DECIMAL,"
+		    + "latitude NUMBER,"
+		    + "longitude NUMBER,"
 		    + "name VARCHAR(30),"
-		    + "stars DECIMAL,"
+		    + "stars NUMBER,"
 		    + "review_count INTEGER)");
 
 		 /* business_review table */
@@ -176,7 +180,7 @@ public class LoadScript {
 
 
 		// ************* USE THIS CODE TO RUN ON TEST FILE WHICH IS FIRST TWO LINES OF REAL FILES **********
-		final int NUM_ENTRIES = 100;
+		final int NUM_ENTRIES = curMax;
 
 		BufferedReader br_temp_business = new BufferedReader(f_business);
 		BufferedReader br_temp_review = new BufferedReader(f_review);
@@ -199,11 +203,14 @@ public class LoadScript {
     String reviewQuery = "insert all ";
 		String line;
 
+    int count = 0;
 		//System.out.println();
 		//System.out.println("FILLING IN BUSINESS, RESTAURANT, LANDMARK AND BUSINESS_HOURS TABLES...");
-
+    //int counter = 0;
 		//fills in rest of tables
 		while((line = br_business.readLine()) != null) {
+		  count++;
+		  if (count <= curMax - 1000) { continue; }
 
 			JsonElement jelement = new JsonParser().parse(line);
 
@@ -224,7 +231,7 @@ public class LoadScript {
       }
 			
 			String business_insert = 
-			    "insert into Business values (" 
+			    "into Business values (" 
 			  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ", " 
 			  + latitude.toString().replaceAll("'", "").replaceAll("\"", "'") + ", " 
 			  + longitude.toString().replaceAll("'", "").replaceAll("\"", "'")  + ", " 
@@ -233,9 +240,10 @@ public class LoadScript {
 			  + review_count.toString().replaceAll("'", "").replaceAll("\"", "'")  + ")";
 			
 
-      dbConnect.addBatch(business_insert);
+      //dbConnect.addBatch(business_insert);
 			//System.out.println(business_insert);
-			//toplevelQuery += business_insert + " ";
+
+			  toplevelQuery += business_insert + " ";
 
 			String type = "Landmark";
 
@@ -269,7 +277,7 @@ public class LoadScript {
 				type = "Restaurants";
 				
 				String restaurant_insert = 
-				    "insert into Restaurant values (" 
+				    "into Restaurant values (" 
 				  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ", " 
 				  + meals.get("breakfast") + ", " 
 				  + meals.get("brunch") + ", " 
@@ -278,10 +286,10 @@ public class LoadScript {
 				  + meals.get("dessert") + ", " 
 				  + meals.get("latenight") + ")";
 				
-				dbConnect.addBatch(restaurant_insert);
+				//dbConnect.addBatch(restaurant_insert);
 				//System.out.println(restaurant_insert);
-				//toplevelQuery += restaurant_insert + " ";
 				
+				  toplevelQuery += restaurant_insert + " ";
 			}
 			else {
 
@@ -296,14 +304,14 @@ public class LoadScript {
 				landmark_categories = "'" + landmark_categories + "'";
 
 				String landmark_insert = 
-				    "insert into Landmark values (" 
+				    "into Landmark values (" 
 				  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ", " 
 				  + landmark_categories + ")";
 				
-				dbConnect.addBatch(landmark_insert);
+				//dbConnect.addBatch(landmark_insert);
 				//System.out.println(landmark_insert);
-				//toplevelQuery += landmark_insert + " ";
 				
+				  toplevelQuery += landmark_insert + " ";
 			}
 
 
@@ -348,38 +356,31 @@ public class LoadScript {
 					String close = open_close.get("close").toString().replaceAll("'", "").replaceAll("\"", "'");
 					
 					String hours_insert = 
-					    "insert into Business_hours values ('" 
+					    "into Business_hours values ('" 
 					  + weekday_abbrev + "', TO_TIMESTAMP(" 
 					  + open + ", 'HH24:MI'), TO_TIMESTAMP(" 
 					  + close + ", 'HH24:MI'), " 
 					  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ")";
 
 
-          dbConnect.addBatch(hours_insert);
-          //toplevelQuery += hours_insert + " ";
-					//System.out.println(hours_insert);
+          //dbConnect.addBatch(hours_insert);
+            toplevelQuery += hours_insert + " ";
+				//	System.out.println(hours_insert);
 				}
 
 
 			}
 
-
 		}
 		
 		//System.out.println();
 		//System.out.println("FILLING IN REVIEW TABLE...");
-		
-    double time = System.currentTimeMillis();
-    dbConnect.executeBatch();
-	  //dbConnect.executeInsert(toplevelQuery);
-
-		time = System.currentTimeMillis() - time;
-    DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
-    String timeElapsedBusiness = formatter.format(time);
 
 		//fills in review entity
+		count = 0;
 		while((line = br_review.readLine()) != null) {
-
+      count++;
+      if (count <= curMax - 1000) { continue; }
 
 			//parse through json and extract desired strings
 
@@ -401,7 +402,7 @@ public class LoadScript {
 
 
     	    String review_insert = 
-			    "insert into business_review values (" 
+			    "into business_review values (" 
 			  + review_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ", "  
 			  + stars.toString().replaceAll("'", "").replaceAll("\"", "'") + ", "  
 			  + "DATE" + date.toString().replaceAll("'", "").replaceAll("\"", "'") + ", " 
@@ -409,18 +410,26 @@ public class LoadScript {
 			  + business_id.toString().replaceAll("'", "").replaceAll("\"", "'") + ")";
 
 
-      dbConnect.addBatch(review_insert);
-      //reviewQuery += review_insert + " ";
+      //dbConnect.addBatch(review_insert);
+      reviewQuery += review_insert + " ";
 			//System.out.println(review_insert); 
 			
 		}
 
 	  toplevelQuery += "select 1 from dual";
 	  reviewQuery += "select 1 from dual";
-    
+
+    double time = System.currentTimeMillis();
+    //dbConnect.executeBatch();
+	  dbConnect.executeInsert(toplevelQuery);
+
+    time = System.currentTimeMillis() - time;
+    DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
+    String timeElapsedBusiness = formatter.format(time);
+ 
     double time1 = System.currentTimeMillis();
-    dbConnect.executeBatch();
-	  //dbConnect.executeInsert(reviewQuery);
+    //dbConnect.executeBatch();
+	  dbConnect.executeInsert(reviewQuery);
 
 	  time = System.currentTimeMillis() - time1;
     formatter = new SimpleDateFormat("mm:ss:SSS");
