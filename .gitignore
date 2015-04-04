@@ -15,6 +15,7 @@ log.txt
 
 # Credentials file
 PopulateDB/login.txt
+oracle/login.txt
 
 # Emacs autosave/recover
 *~
