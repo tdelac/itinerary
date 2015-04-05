@@ -5,13 +5,16 @@ var credentials_error = function () {
   return console.error("Credentials file not properly formatted. Fool.");
 }
 
+/* Create object with credentials */
 function connectObj(user, pass, connect) {
   this.user = user;
   this.password = pass;
   this.connectString = connect;
 }
 
+/* Function called from outside. i.e. db(sql, func, res) in app */
 var execute = function (sql, func, res) {
+  /* Parse credentials file */
   fs.readFile('./oracle/login.txt', 'utf8', function cb (err, data) {
     if (err) return console.error(err);
 
@@ -30,11 +33,16 @@ var execute = function (sql, func, res) {
       credentials_error(); return;
     }
 
+    /* This callback now directs to the connection function, passing in
+     * a credentials object, the sql to execute, the function to execute upon 
+     * completion (provided by the app), and the primary argument to 
+     * the callback function that initiated this whole clusterfuck */
     db_connect(new connectObj(snd[1], thrd[1], fst[1]), sql, func, res);
   });
 }
 
 var db_connect = function (creds, sql, func, res) {
+  /* Establish a connection to oracle */
   oracledb.getConnection(
       creds,
       function(err, connection)
@@ -44,6 +52,7 @@ var db_connect = function (creds, sql, func, res) {
           return;
         }
 
+        /* Execute that sql! */
         connection.execute(
           sql,
           function(err, result)
@@ -52,9 +61,9 @@ var db_connect = function (creds, sql, func, res) {
               console.error(err.message);
               return;
             }
-            console.log(result.rows);
-            func(res, result);
+            func(res, result); // Here's that function the app needs performed!
 
+            /* Close the connection! */
             connection.release(
             function(err) 
             {
@@ -67,6 +76,7 @@ var db_connect = function (creds, sql, func, res) {
         });
 }
 
+/* For testing */
 var main = function () {
   execute("SELECT * FROM Business WHERE rownum < 5");
 }
