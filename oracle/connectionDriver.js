@@ -11,8 +11,8 @@ function connectObj(user, pass, connect) {
   this.connectString = connect;
 }
 
-var execute = function (sql) {
-  fs.readFile('login.txt', 'utf8', function cb (err, data) {
+var execute = function (sql, func, res) {
+  fs.readFile('./oracle/login.txt', 'utf8', function cb (err, data) {
     if (err) return console.error(err);
 
     var lines = data.split('\n');
@@ -30,11 +30,11 @@ var execute = function (sql) {
       credentials_error(); return;
     }
 
-    db_connect(new connectObj(snd[1], thrd[1], fst[1]), sql);
+    db_connect(new connectObj(snd[1], thrd[1], fst[1]), sql, func, res);
   });
 }
 
-var db_connect = function (creds, sql) {
+var db_connect = function (creds, sql, func, res) {
   oracledb.getConnection(
       creds,
       function(err, connection)
@@ -53,6 +53,7 @@ var db_connect = function (creds, sql) {
               return;
             }
             console.log(result.rows);
+            func(res, result);
 
             connection.release(
             function(err) 
@@ -73,3 +74,5 @@ var main = function () {
 if (require.main === module) {
   main();
 }
+
+module.exports = execute;
