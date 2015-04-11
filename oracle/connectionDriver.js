@@ -13,7 +13,7 @@ function connectObj(user, pass, connect) {
 }
 
 /* Function called from outside. i.e. db(sql, func, res) in app */
-var execute = function (sql, func, res) {
+var execute = function (sql, res, func) {
   /* Parse credentials file */
   fs.readFile('./oracle/login.txt', 'utf8', function cb (err, data) {
     if (err) return console.error(err);

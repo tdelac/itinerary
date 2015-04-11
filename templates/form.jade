@@ -1,9 +1,20 @@
 h1 Itinerary App
 div
-  form(action='/home', method='post')
-    div
-      input(type='text', value='', name='query')
-    div
-      input(type='submit', value='Submit', data-trasition='fade', data_theme='c')
+  label Please select the city you would like to visit!
+    form(action='/home', method='post')
+      div 
+        select(name='selector')
+          option(value='Las Vegas, NV') Las Vegas, NV
+          option(value='Phoenix, AZ') Phoeniz, AZ
+          option(value='Madison, WI') Madison, WI
+          option(value='Urbana-Champaign, IL') Urbana-Champaign, IL
+          option(value='Charlotte, NC') Charlotte, NC
+          option(value='Pittsburgh, PA') Pittsburgh, PA
+          option(value='Waterloo, Canada') Waterloo, Canada
+          option(value='Montreal, Canada') Montreal, Canada
+          option(value='Edinburgh, UK') Edinburgh, UK
+          option(value='Karlsruhe, Germany') Karlsruhe, Germany
+      div
+        input(type='submit', value='Submit', data-transition='fade')
 div
   p #{out}
