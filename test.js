@@ -1,7 +1,8 @@
 var express    = require('express');
 var path       = require('path');
-var db         = require('./oracle/connectionDriver.js');
 var bodyparser = require('body-parser');
+var db         = require('./oracle/connectionDriver.js');
+var queries    = require('./oracle/queries.js');
 
 var app = express();
 
@@ -34,9 +35,7 @@ var process_cityform = function(req, res) {
 
 var process_cityform_post = function(req, res) {
   var x = "'" + req.body.selector + "'";
-  var sql = "SELECT latitude, longitude "
-            + "FROM CITY "
-            + "WHERE CITY_NAME=" + x; 
+  var sql = queries.get_city_coords(x); 
 
   db(sql, res, process_cityform_data);
 }
@@ -48,24 +47,13 @@ var process_cityform_post = function(req, res) {
 
 var process_cityform_data = function(res, db_out) {
   var locations = db_out.rows;
-
   if (locations.length != 1) {
     console.log("City not supported"); return;
   }
 
   var latitude  = locations[0][0],
       longitude = locations[0][1];
-
-  var sql = "WITH closest_business AS ( " 
-            + "SELECT b.business_id, b.name, "
-              + "(ACOS(SIN(3.14*b.latitude/180.0)*SIN(3.14*"+latitude+"/180.0)+" 
-              + "COS(3.14*b.latitude/180.0)*COS(3.14*"+latitude+"/180.0)*"
-              + "COS(3.14*"+longitude+"/180.0-3.14*b.longitude/180.0))) AS distance "
-            + "FROM business b "
-            + "ORDER BY distance asc) "
-            + "SELECT name "
-            + "FROM closest_business cb " // DONT FORGET THE GODDAMNED SPACES
-            + "INNER JOIN landmark l on l.business_id = cb.business_id";
+  var sql = queries.get_closest_business(latitude, longitude); 
 
   db(sql, res, render_new_itinerary);
 }
