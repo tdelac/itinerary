@@ -11,13 +11,13 @@ app.set('view engine', 'jade');
 app.use(bodyparser.urlencoded({extended: false}));
 
 /* If direct to 'home' page */
-app.get('/home', function(req, res) {
-  process_form_get(req, res, render_form);
+app.get('/', function(req, res) {
+  process_cityform(req, res);
 });
 
 /* On post request from form submission */
-app.post('/home', function(req, res) {
-  process_form_post(req, res, process_form_data);
+app.post('/', function(req, res) {
+  process_cityform_post(req, res);
 });
 
 /* Port */
@@ -28,20 +28,25 @@ app.listen(process.argv[2]);
 // Process Incoming Request Functions
 // ------------------------------------------------------------
 
-var process_form_get = function(req, res, cb) {
-  cb(res);
+var process_cityform = function(req, res) {
+  render_cityform(res);
 }
 
-var process_form_post = function(req, res, cb) {
+var process_cityform_post = function(req, res) {
   var x = "'" + req.body.selector + "'";
   var sql = "SELECT latitude, longitude "
             + "FROM CITY "
             + "WHERE CITY_NAME=" + x; 
 
-  db(sql, res, cb);
+  db(sql, res, process_cityform_data);
 }
 
-var process_form_data = function(res, db_out) {
+
+//-------------------------------------------------------------
+// Database Callback Functions
+// ------------------------------------------------------------
+
+var process_cityform_data = function(res, db_out) {
   var locations = db_out.rows;
 
   if (locations.length != 1) {
@@ -50,9 +55,6 @@ var process_form_data = function(res, db_out) {
 
   var latitude  = locations[0][0],
       longitude = locations[0][1];
-
-  console.log(latitude);
-  console.log(longitude);
 
   var sql = "WITH closest_business AS ( " 
             + "SELECT b.business_id, b.name, "
@@ -65,7 +67,12 @@ var process_form_data = function(res, db_out) {
             + "FROM closest_business cb " // DONT FORGET THE GODDAMNED SPACES
             + "INNER JOIN landmark l on l.business_id = cb.business_id";
 
-  db(sql, res, render_out);
+  db(sql, res, render_new_itinerary);
+}
+
+/* Display the form with output */
+var render_new_itinerary = function(res, db_out) {
+  res.render('form', {out: db_out.rows});
 }
 
 
@@ -74,11 +81,6 @@ var process_form_data = function(res, db_out) {
 // ------------------------------------------------------------
 
 /* Display the form without output */
-var render_form = function(res) {
+var render_cityform = function(res) {
   res.render('form');
-}
-
-/* Display the form with output */
-var render_out = function(res, db_out) {
-  res.render('form', {out: db_out.rows});
 }
