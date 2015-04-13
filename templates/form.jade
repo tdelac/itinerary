@@ -4,17 +4,29 @@ div
     form(action='/', method='post')
       div 
         select(name='selector')
-          option(value='Las Vegas, NV') Las Vegas, NV
-          option(value='Phoenix, AZ') Phoeniz, AZ
-          option(value='Madison, WI') Madison, WI
-          option(value='Urbana-Champaign, IL') Urbana-Champaign, IL
-          option(value='Charlotte, NC') Charlotte, NC
-          option(value='Pittsburgh, PA') Pittsburgh, PA
-          option(value='Waterloo, Canada') Waterloo, Canada
-          option(value='Montreal, Canada') Montreal, Canada
-          option(value='Edinburgh, UK') Edinburgh, UK
-          option(value='Karlsruhe, Germany') Karlsruhe, Germany
+          option(value='Las Vegas') Las Vegas, NV
+          option(value='Phoenix') Phoeniz, AZ
+          option(value='Madison') Madison, WI
+          option(value='Urbana-Champaign') Urbana-Champaign, IL
+          option(value='Charlotte') Charlotte, NC
+          option(value='Pittsburgh') Pittsburgh, PA
+          option(value='Waterloo') Waterloo, Canada
+          option(value='Montreal') Montreal, Canada
+          option(value='Edinburgh') Edinburgh, UK
+          option(value='Karlsruhe') Karlsruhe, Germany
       div
         input(type='submit', value='Submit', data-transition='fade')
-div
-  p #{out}
+if city
+  div
+    block content
+      h2 Your day in #{city} could be something like
+      if events
+        table
+          tr
+            td= 'Name'
+            td= 'Rating'
+            td= 'Address'
+            each event in events
+              tr
+                each field in event
+                  td= field

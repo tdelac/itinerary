@@ -34,10 +34,19 @@ var process_cityform = function(req, res) {
 }
 
 var process_cityform_post = function(req, res) {
-  var x = "'" + req.body.selector + "'";
-  var sql = queries.get_city_coords(x); 
+  var city = req.body.selector;
+  var citysql = "'" + city + "'";
+  var num_places = 5;
+  var sql = queries.get_landmark_by_stars(citysql, num_places * 10); 
 
-  db(sql, res, process_cityform_data);
+  var dict = {
+    itinerary: {
+      city: city,
+      num_places: num_places,
+    }
+  };
+
+  db(sql, res, dict, render_new_itinerary);
 }
 
 
@@ -45,22 +54,31 @@ var process_cityform_post = function(req, res) {
 // Database Callback Functions
 // ------------------------------------------------------------
 
-var process_cityform_data = function(res, db_out) {
+var process_cityform_data = function(res, dict, db_out) {
   var locations = db_out.rows;
-  if (locations.length != 1) {
-    console.log("City not supported"); return;
-  }
 
-  var latitude  = locations[0][0],
-      longitude = locations[0][1];
-  var sql = queries.get_closest_business(latitude, longitude); 
-
-  db(sql, res, render_new_itinerary);
+  var sql = queries.get_closest_business(latitude, longitude);
+  db(sql, res, dict, render_new_itinerary);
 }
 
 /* Display the form with output */
-var render_new_itinerary = function(res, db_out) {
-  res.render('form', {out: db_out.rows});
+var render_new_itinerary = function(res, dict, db_out) {
+  var ouput = db_out.rows;
+
+  var city = dict.itinerary.city,
+      num_places = dict.itinerary.num_places,
+      rows = [];
+
+  for (var i = 0; i < num_places; ++i) {
+    rows[i] = ouput[i];
+  }
+  console.log(rows);
+
+  res.render(
+      'form', 
+      {city: city,
+       events: rows}
+  );
 }
 
 

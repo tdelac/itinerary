@@ -13,7 +13,7 @@ function connectObj(user, pass, connect) {
 }
 
 /* Function called from outside. i.e. db(sql, func, res) in app */
-var execute = function (sql, res, func) {
+var execute = function (sql, res, dict, func) {
   /* Parse credentials file */
   fs.readFile('./oracle/login.txt', 'utf8', function cb (err, data) {
     if (err) return console.error(err);
@@ -37,11 +37,11 @@ var execute = function (sql, res, func) {
      * a credentials object, the sql to execute, the function to execute upon 
      * completion (provided by the app), and the primary argument to 
      * the callback function that initiated this whole clusterfuck */
-    db_connect(new connectObj(snd[1], thrd[1], fst[1]), sql, func, res);
+    db_connect(new connectObj(snd[1], thrd[1], fst[1]), sql, res, dict, func);
   });
 }
 
-var db_connect = function (creds, sql, func, res) {
+var db_connect = function (creds, sql, res, dict, func) {
   /* Establish a connection to oracle */
   oracledb.getConnection(
       creds,
@@ -61,7 +61,7 @@ var db_connect = function (creds, sql, func, res) {
               console.error(err.message);
               return;
             }
-            func(res, result); // Here's that function the app needs performed!
+            func(res, dict, result); // Here's that function the app needs performed!
 
             /* Close the connection! */
             connection.release(
