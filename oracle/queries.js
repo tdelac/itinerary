@@ -51,7 +51,24 @@ module.exports = {
           + "SELECT * " 
           + "FROM star_ordered "
           + "WHERE rownum <= " + rows);
-  }/*,
+  },
+  
+  get_landmark_by_utility: function(city_name, rows, t, b) {
+    return ("WITH star_ordered AS ( "
+            + "SELECT b.name, b.stars, b.address "
+            + "FROM business b "
+              + "INNER JOIN landmark l "
+              + "ON b.business_id = l.business_id "
+            + "WHERE b.city = " + city_name
+            + " ORDER BY (b.review_count * power(" + t + ",b.stars -" + b + ")) DESC) "
+          + "SELECT * " 
+          + "FROM star_ordered "
+          + "WHERE rownum <= " + rows);
+  }
+  
+  /*,
+  
+  
 
   get_landmark_by_stars_weighted: function(city_name, rows) {
     return ("WITH weighted_stars AS ( "
