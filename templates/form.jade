@@ -7,7 +7,8 @@ div
           option(value='Las Vegas') Las Vegas, NV
           option(value='Phoenix') Phoeniz, AZ
           option(value='Madison') Madison, WI
-          option(value='Urbana-Champaign') Urbana-Champaign, IL
+          option(value='Urbana') Urbana, IL
+          option(value='Champaign') Champaign, IL
           option(value='Charlotte') Charlotte, NC
           option(value='Pittsburgh') Pittsburgh, PA
           option(value='Waterloo') Waterloo, Canada
@@ -28,5 +29,6 @@ if city
             td= 'Address'
             each event in events
               tr
-                each field in event
-                  td= field
+                if event
+                  each field in event
+                    td= field

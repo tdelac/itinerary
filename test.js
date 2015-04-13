@@ -36,8 +36,8 @@ var process_cityform = function(req, res) {
 var process_cityform_post = function(req, res) {
   var city = req.body.selector;
   var citysql = "'" + city + "'";
-  var num_places = 5;
-  var sql = queries.get_landmark_by_stars(citysql, num_places * 10); 
+  var num_places = 12;
+  var sql = queries.get_landmark_by_stars(citysql, num_places * 1); //1 for now 
 
   var dict = {
     itinerary: {
@@ -72,7 +72,6 @@ var render_new_itinerary = function(res, dict, db_out) {
   for (var i = 0; i < num_places; ++i) {
     rows[i] = ouput[i];
   }
-  console.log(rows);
 
   res.render(
       'form', 
