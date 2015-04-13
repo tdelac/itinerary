@@ -55,7 +55,7 @@ module.exports = {
   
   get_landmark_by_utility: function(city_name, rows, t, b) {
     return ("WITH star_ordered AS ( "
-            + "SELECT b.name, b.stars, b.review_count, b.address "
+            + "SELECT b.name, b.stars, b.address "
             + "FROM business b "
               + "INNER JOIN landmark l "
               + "ON b.business_id = l.business_id "
