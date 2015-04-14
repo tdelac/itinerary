@@ -1,4 +1,4 @@
-# Modules and libraries
+`# Modules and libraries
 node_modules/
 
 # Data folder
@@ -20,9 +20,13 @@ oracle/login.txt
 # Emacs autosave/recover
 *~
 *#
+.#*
 
 # Mac OS
 .DS_Store
 
 # Scratch file
 scratch.txt
+
+# Secrets file
+secrets.js
