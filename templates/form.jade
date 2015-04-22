@@ -29,6 +29,25 @@ if city
   div
     block content
       h2 Your day in #{city} could be something like
+      if breakfast
+      p Breakfast
+      table
+        tr
+        each field in breakfast
+          td= field
+      if lunch
+      p Lunch
+      table
+        tr
+        each field in lunch
+          td= field
+      if dinner
+      p Dinner
+      table
+        tr
+        each field in dinner
+          td= field
+      p Landmarks
       if events
         table
           tr

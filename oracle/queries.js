@@ -51,7 +51,7 @@ module.exports = {
               + "INNER JOIN business_review r "
               + "ON b.business_id = r.business_id "
         
-          + "star_ordered AS ( "
+          + "star_ORdered AS ( "
             + "SELECT b.name, b.stars, b.address "
             + "FROM business b "
               + "INNER JOIN landmark l "
@@ -59,7 +59,7 @@ module.exports = {
             + "WHERE b.city = " + city_name
             + " ORDER BY (b.stars*b.review_count) DESC) "
           + "SELECT * " 
-          + "FROM star_ordered "
+          + "FROM star_ORdered "
           + "WHERE rownum <= " + rows*/);
   },
   
@@ -74,11 +74,7 @@ module.exports = {
           + "SELECT * " 
           + "FROM star_ordered "
           + "WHERE rownum <= " + rows);
-  }
-  
-  ,
-  
-  
+  },
 
   get_landmark_by_stars_weighted: function(city_name, rows) {
     return ("WITH weighted_stars AS ( "
@@ -87,6 +83,48 @@ module.exports = {
               + "INNER JOIN landmark l "
               + "ON b.business_id = l.business_id "
             + "WHERE b.city = " + city_name + " "
+            + "ORDER BY (b.review_count * b.stars) desc) "
+            + "SELECT * FROM weighted_stars "
+            + "WHERE rownum <= " + rows);
+  },
+
+  get_breakfast_by_stars_weighted: function(city_name, rows) {
+    return ("WITH weighted_stars AS ( "
+            + "SELECT b.name, b.stars, b.address "
+            + "FROM business b "
+              + "INNER JOIN restaurant r "
+              + "ON b.business_id = r.business_id "
+            + "WHERE b.city = " + city_name + " AND " 
+              + "(r.breakfast = 1 OR r.brunch = 1 OR "
+              + "(r.breakfast = 0 AND r.brunch = 0 AND r.lunch = 0 AND r.dinner = 0 AND r.dessert = 0 AND r.latenight = 0)) "
+            + "ORDER BY (b.review_count * b.stars) desc) "
+            + "SELECT * FROM weighted_stars "
+            + "WHERE rownum <= " + rows);
+  },
+
+  get_lunch_by_stars_weighted: function(city_name, rows) {
+    return ("WITH weighted_stars AS ( "
+            + "SELECT b.name, b.stars, b.address "
+            + "FROM business b "
+              + "INNER JOIN restaurant r "
+              + "ON b.business_id = r.business_id "
+            + "WHERE b.city = " + city_name + " AND " 
+              + "(r.brunch = 1 OR r.lunch = 1 OR "
+              + "(r.breakfast = 0 AND r.brunch = 0 AND r.lunch = 0 AND r.dinner = 0 AND r.dessert = 0 AND r.latenight = 0)) "
+            + "ORDER BY (b.review_count * b.stars) desc) "
+            + "SELECT * FROM weighted_stars "
+            + "WHERE rownum <= " + rows);
+  },
+
+  get_dinner_by_stars_weighted: function(city_name, rows) {
+    return ("WITH weighted_stars AS ( "
+            + "SELECT b.name, b.stars, b.address "
+            + "FROM business b "
+              + "INNER JOIN restaurant r "
+              + "ON b.business_id = r.business_id "
+            + "WHERE b.city = " + city_name + " AND " 
+              + "(r.dinner = 1 OR r.latenight = 1 OR "
+              + "(r.breakfast = 0 AND r.brunch = 0 AND r.lunch = 0 AND r.dinner = 0 AND r.dessert = 0 AND r.latenight = 0)) "
             + "ORDER BY (b.review_count * b.stars) desc) "
             + "SELECT * FROM weighted_stars "
             + "WHERE rownum <= " + rows);

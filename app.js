@@ -17,6 +17,7 @@ var static     = require('./static_funcs.js');
 var FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID();
 var FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET();
 var RAND_BUFFER = 5;
+var RAND_RESTAURANT = RAND_BUFFER * 5;
 
 /* Dynamic */
 var suggestions; // Stored globally for persistence
@@ -150,7 +151,8 @@ var process_cityform = function(req, res) {
 }
 
 var process_cityform_post = function(req, res) {
-  /* If user has requested a new itinerary */
+  // TODO more info on restaurants, add ability to re-select single meal
+  /* If user requests new itinerary */
   if (req.body.hasOwnProperty('refresh')) {
     render_new_itinerary(res, glbl_dict, suggestions);
   } 
@@ -161,8 +163,8 @@ var process_cityform_post = function(req, res) {
     var num_landmarks = req.body.num_landmarks;
     var citysql = "'" + city + "'";
     var sql = 
-      queries.get_landmark_by_stars_weighted
-        (citysql, num_landmarks * RAND_BUFFER); //1 for now 
+      queries.get_breakfast_by_stars_weighted
+        (citysql, RAND_RESTAURANT);
 
     /* Note: refactor this to just be global perhaps? */
     var dict = {
@@ -172,7 +174,7 @@ var process_cityform_post = function(req, res) {
       }
     };
 
-    db(sql, res, dict, render_new_itinerary);
+    db(sql, res, dict, process_breakfast);
   }
 }
 
@@ -189,6 +191,40 @@ var process_cityform_data = function(res, dict, db_out) {
   db(sql, res, dict, render_new_itinerary);
 }
 
+/* Process breakfast search query */
+var process_breakfast = function(res, dict, db_out) {
+  dict.breakfast = db_out.rows;
+  
+  var sql = 
+    queries.get_lunch_by_stars_weighted
+      ("'" + dict.itinerary.city + "'", RAND_RESTAURANT);
+
+  console.log(dict.breakfast);
+  db(sql, res, dict, process_lunch);
+}
+
+/* Process lunch search query */
+var process_lunch = function(res, dict, db_out) {
+  dict.lunch = db_out.rows;
+  
+  var sql = 
+    queries.get_dinner_by_stars_weighted
+      ("'" + dict.itinerary.city + "'", RAND_RESTAURANT);
+
+  db(sql, res, dict, process_dinner);
+}
+
+/* Process dinner search query */
+var process_dinner = function(res, dict, db_out) {
+  dict.dinner = db_out.rows;
+  
+  var sql = 
+    queries.get_landmark_by_stars_weighted
+      ("'" + dict.itinerary.city + "'", dict.itinerary.num_landmarks * RAND_BUFFER);
+
+  console.log(dict.dinner);
+  db(sql, res, dict, render_new_itinerary);
+}
 
 /* Display the form with output */
 var render_new_itinerary = function(res, dict, db_out) {
@@ -199,7 +235,19 @@ var render_new_itinerary = function(res, dict, db_out) {
   var output = static.array_deep_copy(db_out.rows),
       city = dict.itinerary.city,
       num_landmarks = dict.itinerary.num_landmarks,
-      rows = [];
+      rows = [],
+      breakfast = dict.breakfast[Math.floor(Math.random() * RAND_RESTAURANT)], // Consider refactoring this BS into an inline helper
+      lunch  = dict.lunch[Math.floor(Math.random() * RAND_RESTAURANT)],
+      dinner = dict.dinner[Math.floor(Math.random() * RAND_RESTAURANT)];
+
+  console.log(lunch);
+  /* Make sure eateries are unique */
+  while (lunch[0] === breakfast[0]) {
+    lunch = dict.lunch[Math.floor(Math.random() * RAND_RESTAURANT)];
+  }
+  while (dinner[0] === lunch[0] || dinner[0] === breakfast[0]) {
+    dinner = dict.dinner[Math.floor(Math.random() * RAND_RESTAURANT)];
+  }
 
   /* Generate randomized output to display */
   for (var i = 0; i < num_landmarks; ++i) {
@@ -213,10 +261,15 @@ var render_new_itinerary = function(res, dict, db_out) {
     output[randomized] = null;
   }
 
+  /* Output */
   res.render(
       'form', 
       {city: city,
-       events: rows}
+       events: rows,
+       breakfast: breakfast,
+       lunch: lunch,
+       dinner: dinner
+      }
   );
 }
 
