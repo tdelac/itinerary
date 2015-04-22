@@ -11,10 +11,16 @@ var path       = require('path');
 var bodyparser = require('body-parser');
 var db         = require('./oracle/connectionDriver.js');
 var queries    = require('./oracle/queries.js');
+var static     = require('./static_funcs.js');
 
+/* Constants */
 var FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID();
 var FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET();
+var RAND_BUFFER = 5;
 
+/* Dynamic */
+var suggestions; // Stored globally for persistence
+var glbl_dict;
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
@@ -144,19 +150,30 @@ var process_cityform = function(req, res) {
 }
 
 var process_cityform_post = function(req, res) {
-  var city = req.body.selector;
-  var citysql = "'" + city + "'";
-  var num_places = 12;
-  var sql = queries.get_landmark_by_stars(citysql, num_places * 1); //1 for now 
+  /* If user has requested a new itinerary */
+  if (req.body.hasOwnProperty('refresh')) {
+    render_new_itinerary(res, glbl_dict, suggestions);
+  } 
 
-  var dict = {
-    itinerary: {
-      city: city,
-      num_places: num_places,
-    }
-  };
+  /* If user is submitting for the first time */
+  else {
+    var city = req.body.selector;
+    var num_landmarks = req.body.num_landmarks;
+    var citysql = "'" + city + "'";
+    var sql = 
+      queries.get_landmark_by_stars_weighted
+        (citysql, num_landmarks * RAND_BUFFER); //1 for now 
 
-  db(sql, res, dict, render_new_itinerary);
+    /* Note: refactor this to just be global perhaps? */
+    var dict = {
+      itinerary: {
+        city: city,
+        num_landmarks: num_landmarks,
+      }
+    };
+
+    db(sql, res, dict, render_new_itinerary);
+  }
 }
 
 
@@ -164,6 +181,7 @@ var process_cityform_post = function(req, res) {
 // Database Callback Functions
 // ------------------------------------------------------------
 
+/* Not being used right now */
 var process_cityform_data = function(res, dict, db_out) {
   var locations = db_out.rows;
 
@@ -171,16 +189,28 @@ var process_cityform_data = function(res, dict, db_out) {
   db(sql, res, dict, render_new_itinerary);
 }
 
+
 /* Display the form with output */
 var render_new_itinerary = function(res, dict, db_out) {
-  var ouput = db_out.rows;
+  /* Save global stuff */
+  suggestions = db_out;
+  glbl_dict = dict;
 
-  var city = dict.itinerary.city,
-      num_places = dict.itinerary.num_places,
+  var output = static.array_deep_copy(db_out.rows),
+      city = dict.itinerary.city,
+      num_landmarks = dict.itinerary.num_landmarks,
       rows = [];
 
-  for (var i = 0; i < num_places; ++i) {
-    rows[i] = ouput[i];
+  /* Generate randomized output to display */
+  for (var i = 0; i < num_landmarks; ++i) {
+    var randomized = Math.floor(Math.random() * (output.length - 1));
+
+    while (output[randomized] == null) {
+      randomized = Math.floor(Math.random() * (output.length - 1));
+    }
+
+    rows[i] = output[randomized];
+    output[randomized] = null;
   }
 
   res.render(

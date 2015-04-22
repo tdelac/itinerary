@@ -41,7 +41,17 @@ module.exports = {
   },
 
   get_landmark_by_stars: function(city_name, rows) {
-    return ("WITH star_ordered AS ( "
+    return (""
+        
+/*        
+        
+        "WITH business_review_filtered AS ( "
+            + "SELECT b.name, b.stars, b.address "
+            + "FROM business b "
+              + "INNER JOIN business_review r "
+              + "ON b.business_id = r.business_id "
+        
+          + "star_ordered AS ( "
             + "SELECT b.name, b.stars, b.address "
             + "FROM business b "
               + "INNER JOIN landmark l "
@@ -50,7 +60,7 @@ module.exports = {
             + " ORDER BY (b.stars*b.review_count) DESC) "
           + "SELECT * " 
           + "FROM star_ordered "
-          + "WHERE rownum <= " + rows);
+          + "WHERE rownum <= " + rows*/);
   },
   
   get_landmark_by_utility: function(city_name, rows, t, b) {
@@ -66,19 +76,19 @@ module.exports = {
           + "WHERE rownum <= " + rows);
   }
   
-  /*,
+  ,
   
   
 
   get_landmark_by_stars_weighted: function(city_name, rows) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address, (b.review_count * b.stars) AS wstar "
+            + "SELECT b.name, b.stars, b.address "
             + "FROM business b "
               + "INNER JOIN landmark l "
               + "ON b.business_id = l.business_id "
-            + "WHERE b.city = " + city_name + "), "
-            + "
-          + "SELECT ws.name, ws.stars, ws.address "
-  
-  }*/
+            + "WHERE b.city = " + city_name + " "
+            + "ORDER BY (b.review_count * b.stars) desc) "
+            + "SELECT * FROM weighted_stars "
+            + "WHERE rownum <= " + rows);
+  }
 }

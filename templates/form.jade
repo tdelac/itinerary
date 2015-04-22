@@ -10,7 +10,7 @@ div
       div 
         select(name='selector')
           option(value='Las Vegas') Las Vegas, NV
-          option(value='Phoenix') Phoeniz, AZ
+          option(value='Phoenix') Phoenix, AZ
           option(value='Madison') Madison, WI
           option(value='Urbana') Urbana, IL
           option(value='Champaign') Champaign, IL
@@ -20,6 +20,9 @@ div
           option(value='Montreal') Montreal, Canada
           option(value='Edinburgh') Edinburgh, UK
           option(value='Karlsruhe') Karlsruhe, Germany
+      div
+        label How many things would you like to do today?
+          input(type='text', value='', name='num_landmarks')
       div
         input(type='submit', value='Submit', data-transition='fade')
 if city
@@ -37,3 +40,6 @@ if city
                 if event
                   each field in event
                     td= field
+     form(action='/', method='post')
+       input(type='hidden', value='non-null', name='refresh')
+       input(type='submit', value='Nah, gimme something else')

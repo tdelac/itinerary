@@ -168,4 +168,7 @@ select name
 from closest_business cb
 inner join landmark l on cb.business_id = l.business_id
 ```
+
+with test_table as (select * from business_review where rownum < 200), date_ordered as (select row_number() over(order by tt.review_date desc) as  row_num, tt.review_id, tt.review_date, tt.useful from test_table tt order by tt.review_date desc), useful_ordered as (select row_number() over(order by tt.useful desc) as row_num, tt.review_id, tt.review_date, tt.useful from test_table tt order by tt.useful desc) select do.review_date, do.useful, do.row_num, uo.row_num from date_ordered do inner join useful_ordered uo on do.review_id = uo.review_id order by (do.row_num +uo.row_num) asc;
+
     
