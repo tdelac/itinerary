@@ -91,12 +91,12 @@ var app = express();
 
 
 /* If direct to 'home' page */
-app.get('/', function(req, res) {
+app.get('/', ensureAuthenticated, function(req, res) {
   process_cityform(req, res);
 });
 
 /* On post request from form submission */
-app.post('/', function(req, res) {
+app.post('/',ensureAuthenticated, function(req, res) {
   process_cityform_post(req, res);
 });
 
