@@ -58,10 +58,14 @@ passport.use(new FacebookStrategy({
   function(accessToken, refreshToken, profile, done) {
     // asynchronous verification, for effect...
     process.nextTick(function () {
-          
+
+      // gets friends who have logged in with the app
       facebook.getFbData(accessToken, '/me/friends', function(data){
-          // returns friends who have logged in with the app
-          console.log(data);
+          // data is given as a string so either parse or use re: /(.*\[+)(.*)(\].*)/;
+          var obj = JSON.parse(data)
+          var friends = obj.data
+          console.log(friends);
+          glbl_dict.friends = friends
       });
       // To keep the example simple, the user's Facebook profile is returned to
       // represent the logged-in user.  In a typical application, you would want
@@ -103,7 +107,7 @@ app.post('/',ensureAuthenticated, function(req, res) {
 
 
 app.get('/account', ensureAuthenticated, function(req, res){
-  res.render('account', { user: req.user });
+    res.render('account', { user: req.user, friends: glbl_dict.friends});
 });
 
 app.get('/login', function(req, res){
