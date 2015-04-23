@@ -12,7 +12,7 @@ var bodyparser = require('body-parser');
 var db         = require('./oracle/connectionDriver.js');
 var queries    = require('./oracle/queries.js');
 var static     = require('./static_funcs.js');
-
+var facebook = require('./facebook');
 /* Constants */
 var FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID();
 var FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET();
@@ -51,7 +51,11 @@ passport.use(new FacebookStrategy({
   function(accessToken, refreshToken, profile, done) {
     // asynchronous verification, for effect...
     process.nextTick(function () {
-      
+          
+      facebook.getFbData(accessToken, '/me/friends', function(data){
+          // returns friends who have logged in with the app
+          console.log(data);
+      });
       // To keep the example simple, the user's Facebook profile is returned to
       // represent the logged-in user.  In a typical application, you would want
       // to associate the Facebook account with a user record in your database,
@@ -105,7 +109,7 @@ app.get('/login', function(req, res){
 //   redirecting the user to facebook.com.  After authorization, Facebook will
 //   redirect the user back to this application at /auth/facebook/callback
 app.get('/auth/facebook',
-  passport.authenticate('facebook'),
+  passport.authenticate('facebook', {scope: ['user_friends']}),
   function(req, res){
     // The request will be redirected to Facebook for authentication, so this
     // function will not be called.
