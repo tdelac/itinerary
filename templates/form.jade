@@ -51,6 +51,7 @@ html
         if city
           div
             block content
+              a(name='breakfast')
               h2 Your day in #{city} could be something like
               if breakfast
               p Breakfast
@@ -58,7 +59,8 @@ html
                 tr
                 each field in breakfast
                   td= field
-              form(action='/', method='post')
+              a(name='lunch')
+              form(action='/#breakfast', method='post')
                input(type='hidden', value='non-null', name='new_breakfast')
                input(type='submit', value='Eww, no.')
               if lunch
@@ -67,18 +69,20 @@ html
                 tr
                 each field in lunch
                   td= field
-              form(action='/', method='post')
+              form(action='/#lunch', method='post')
                input(type='hidden', value='non-null', name='new_lunch')
                input(type='submit', value='Eww, no.')
+              a(name='dinner')
               if dinner
               p Dinner
               table
                 tr
                 each field in dinner
                   td= field
-              form(action='/', method='post')
+              form(action='/#dinner', method='post')
                input(type='hidden', value='non-null', name='new_dinner')
                input(type='submit', value='Eww, no.')
+              a(name='landmarks')
               p Landmarks
               if events
                 table
@@ -91,7 +95,7 @@ html
                         if event
                           each field in event
                             td= field
-             form(action='/', method='post')
+             form(action='/#landmarks', method='post')
                input(type='hidden', value='non-null', name='refresh')
                input(type='submit', value='Nah, gimme something else')
 
