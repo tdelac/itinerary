@@ -1,0 +1,55 @@
+html
+  head
+    link(href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css', rel='stylesheet')
+  div(class="background-image")
+  style body {background-image:url('https://newevolutiondesigns.com/images/freebies/city-wallpaper-18.jpg');
+  body
+    div.container
+      div.jumbotron
+        if city
+          div
+            block content
+              h2 Your day in #{city} could be something like
+              if breakfast
+              p Breakfast
+              table
+                tr
+                each field in breakfast
+                  td= field
+              form(action='/', method='post')
+               input(type='hidden', value='non-null', name='new_breakfast')
+               input(type='submit', value='Eww, no.')
+              if lunch
+              p Lunch
+              table
+                tr
+                each field in lunch
+                  td= field
+              form(action='/', method='post')
+               input(type='hidden', value='non-null', name='new_lunch')
+               input(type='submit', value='Eww, no.')
+              if dinner
+              p Dinner
+              table
+                tr
+                each field in dinner
+                  td= field
+              form(action='/', method='post')
+               input(type='hidden', value='non-null', name='new_dinner')
+               input(type='submit', value='Eww, no.')
+              p Landmarks
+              if events
+                table
+                  tr
+                    td= 'Name'
+                    td= 'Rating'
+                    td= 'Address'
+                    each event in events
+                      tr
+                        if event
+                          each field in event
+                            td= field
+             form(action='/', method='post')
+               input(type='hidden', value='non-null', name='refresh')
+               input(type='submit', value='Nah, gimme something else')
+

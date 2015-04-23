@@ -97,6 +97,13 @@ app.get('/', function(req, res) {
 
 /* On post request from form submission */
 app.post('/', function(req, res) {
+  var city = encodeURIComponent(req.body.selector);
+  var num_landmarks = encodeURIComponent(req.body.num_landmarks);
+  res.redirect('/itinerary/?city=' + city + '&num_landmarks=' + num_landmarks)
+});
+
+
+app.get('/itinerary', function(req, res) {
   process_cityform_post(req, res);
 });
 
@@ -240,8 +247,8 @@ var process_cityform_post = function(req, res) {
 
   /* If user is submitting for the first time */
   else {
-    var city = req.body.selector;
-    var num_landmarks = req.body.num_landmarks;
+    var city = req.query.city;
+    var num_landmarks = req.query.num_landmarks;
     var citysql = "'" + city + "'";
     var sql = 
       queries.get_breakfast_by_stars_weighted
@@ -362,5 +369,5 @@ var render_cityform = function(res) {
 
 /* Display the form with output */
 var render_form_itinerary = function(res) {
-  res.render('form', glbl_dict.output);
+  res.render('itinerary', glbl_dict.output);
 }
