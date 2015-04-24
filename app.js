@@ -305,8 +305,21 @@ var process_dinner = function(res, db_out) {
 /* Display the form with output */
 var make_new_itinerary = function(res, db_out) {
   glbl_dict.landmarks = db_out.rows;
+  for (var i = 0; i < glbl_dict.landmarks.length; ++i) {
+    /* Fux with time stuff */
+    var open = static.get_format_time(glbl_dict.landmarks[i][3]),
+        close = static.get_format_time(glbl_dict.landmarks[i][4]);
 
-  var output = static.array_deep_copy(db_out.rows),
+    if (open === close) {
+      glbl_dict.landmarks[i][3] = "Open 24 hours";
+      glbl_dict.landmarks[i][4] = "";
+    } else {
+      glbl_dict.landmarks[i][3] = open;
+      glbl_dict.landmarks[i][4] = close;
+    }
+  }
+
+  var output = static.array_deep_copy(glbl_dict.landmarks),
       city = glbl_dict.city,
       num_landmarks = glbl_dict.num_landmarks,
       rows = [],
@@ -332,10 +345,6 @@ var make_new_itinerary = function(res, db_out) {
 
     rows[i] = output[randomized];
     output[randomized] = null;
-
-    /* Fux with time stuff */
-    var open = rows[i][3],
-        close = rows[i][4];
   }
 
   /* Build add output to be rendered to global state */
