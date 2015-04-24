@@ -18,10 +18,17 @@ var FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID();
 var FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET();
 var RAND_BUFFER = 5;
 var RAND_RESTAURANT = RAND_BUFFER * 5;
+var WEEKDAY = new Array(7);
+WEEKDAY[0] = "\'Su\'";
+WEEKDAY[1] = "\'M\'";
+WEEKDAY[2] = "\'Tu\'";
+WEEKDAY[3] = "\'W\'";
+WEEKDAY[4] = "\'Th\'";
+WEEKDAY[5] = "\'F\'";
+WEEKDAY[6] = "\'Sa\'";
 
 /* Dynamic */
-var suggestions; // Stored globally for persistence
-var glbl_dict;
+var glbl_dict = {output: {}} // Global state of itinerary data
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
@@ -60,8 +67,6 @@ passport.use(new FacebookStrategy({
     });
   }
 ));
-
-
 
 
 var app = express();
@@ -151,10 +156,82 @@ var process_cityform = function(req, res) {
 }
 
 var process_cityform_post = function(req, res) {
-  // TODO more info on restaurants, add ability to re-select single meal
-  /* If user requests new itinerary */
+  // Set date
+  glbl_dict.day = WEEKDAY[(new Date()).getDay()];
+
+  // Retrieve what is currently outputted
+  var breakfast = glbl_dict.output.breakfast,
+      lunch = glbl_dict.output.lunch,
+      dinner = glbl_dict.output.dinner;
+
+  /* User requests different breakfast option */
+  if (req.body.hasOwnProperty('new_breakfast')) {
+    var new_breakfast = glbl_dict.breakfast[static.rand(RAND_RESTAURANT)];
+
+    // Generate a new, unique breakfast option
+    while (new_breakfast[0] === lunch[0] || 
+           new_breakfast[0] === dinner[0] || 
+           new_breakfast[0] === breakfast[0]) {
+      new_breakfast = glbl_dict.breakfast[static.rand(RAND_RESTAURANT)];      
+    }
+
+    glbl_dict.output.breakfast = new_breakfast; // Update global
+    console.log(glbl_dict);
+    render_form_itinerary(res);
+    return;
+  }
+
+  /* User requests different lunch option */
+  if (req.body.hasOwnProperty('new_lunch')) {
+    var new_lunch = glbl_dict.lunch[static.rand(RAND_RESTAURANT)];
+
+    // Generate a new, unique breakfast option
+    while (new_lunch[0] === lunch[0] || 
+           new_lunch[0] === dinner[0] || 
+           new_lunch[0] === breakfast[0]) {
+      new_lunch = glbl_dict.lunch[static.rand(RAND_RESTAURANT)];      
+    }
+
+    glbl_dict.output.lunch = new_lunch; // Update global
+    render_form_itinerary(res);
+    return;
+  }
+
+  /* User requerst different dinner option */
+  if (req.body.hasOwnProperty('new_dinner')) {
+    var new_dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];
+
+    // Generate a new, unique breakfast option
+    while (new_dinner[0] === lunch[0] || 
+           new_dinner[0] === dinner[0] || 
+           new_dinner[0] === breakfast[0]) {
+      new_dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];      
+    }
+
+    glbl_dict.output.dinner = new_dinner; // Update global
+    render_form_itinerary(res);
+    return;
+  }
+
+  /* If user requests new set of landmarks */
   if (req.body.hasOwnProperty('refresh')) {
-    render_new_itinerary(res, glbl_dict, suggestions);
+    var output = static.array_deep_copy(glbl_dict.landmarks),
+        rows = [];
+
+    for(var i = 0; i < glbl_dict.num_landmarks; ++i) {
+      var randomized = static.rand(output.length - 1);
+
+      while (output[randomized] == null) {
+        randomized = static.rand(output.length - 1);
+      }
+
+      rows[i] = output[randomized];
+      output[randomized] = null;
+    }
+
+    glbl_dict.output.events = rows;
+    render_form_itinerary(res);
+    return;
   } 
 
   /* If user is submitting for the first time */
@@ -164,17 +241,13 @@ var process_cityform_post = function(req, res) {
     var citysql = "'" + city + "'";
     var sql = 
       queries.get_breakfast_by_stars_weighted
-        (citysql, RAND_RESTAURANT);
+        (citysql, glbl_dict.day, RAND_RESTAURANT);
 
-    /* Note: refactor this to just be global perhaps? */
-    var dict = {
-      itinerary: {
-        city: city,
-        num_landmarks: num_landmarks,
-      }
-    };
+    /* Setup the global itinerary object */
+    glbl_dict.city = city;
+    glbl_dict.num_landmarks = num_landmarks;
 
-    db(sql, res, dict, process_breakfast);
+    db(sql, res, process_breakfast);
   }
 }
 
@@ -184,93 +257,93 @@ var process_cityform_post = function(req, res) {
 // ------------------------------------------------------------
 
 /* Not being used right now */
-var process_cityform_data = function(res, dict, db_out) {
+var process_cityform_data = function(res, db_out) {
   var locations = db_out.rows;
 
   var sql = queries.get_closest_business(latitude, longitude);
-  db(sql, res, dict, render_new_itinerary);
+  db(sql, res, make_new_itinerary);
 }
 
 /* Process breakfast search query */
-var process_breakfast = function(res, dict, db_out) {
-  dict.breakfast = db_out.rows;
+var process_breakfast = function(res, db_out) {
+  glbl_dict.breakfast = db_out.rows;
   
   var sql = 
     queries.get_lunch_by_stars_weighted
-      ("'" + dict.itinerary.city + "'", RAND_RESTAURANT);
+      ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT);
 
-  console.log(dict.breakfast);
-  db(sql, res, dict, process_lunch);
+  db(sql, res, process_lunch);
 }
 
 /* Process lunch search query */
-var process_lunch = function(res, dict, db_out) {
-  dict.lunch = db_out.rows;
+var process_lunch = function(res, db_out) {
+  glbl_dict.lunch = db_out.rows;
   
   var sql = 
     queries.get_dinner_by_stars_weighted
-      ("'" + dict.itinerary.city + "'", RAND_RESTAURANT);
+      ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT);
 
-  db(sql, res, dict, process_dinner);
+  db(sql, res, process_dinner);
 }
 
 /* Process dinner search query */
-var process_dinner = function(res, dict, db_out) {
-  dict.dinner = db_out.rows;
+var process_dinner = function(res, db_out) {
+  glbl_dict.dinner = db_out.rows;
   
   var sql = 
     queries.get_landmark_by_stars_weighted
-      ("'" + dict.itinerary.city + "'", dict.itinerary.num_landmarks * RAND_BUFFER);
+      ("'" + glbl_dict.city + "'", glbl_dict.day, glbl_dict.num_landmarks * RAND_BUFFER);
 
-  console.log(dict.dinner);
-  db(sql, res, dict, render_new_itinerary);
+  db(sql, res, make_new_itinerary);
 }
 
 /* Display the form with output */
-var render_new_itinerary = function(res, dict, db_out) {
-  /* Save global stuff */
-  suggestions = db_out;
-  glbl_dict = dict;
+var make_new_itinerary = function(res, db_out) {
+  glbl_dict.landmarks = db_out.rows;
 
   var output = static.array_deep_copy(db_out.rows),
-      city = dict.itinerary.city,
-      num_landmarks = dict.itinerary.num_landmarks,
+      city = glbl_dict.city,
+      num_landmarks = glbl_dict.num_landmarks,
       rows = [],
-      breakfast = dict.breakfast[Math.floor(Math.random() * RAND_RESTAURANT)], // Consider refactoring this BS into an inline helper
-      lunch  = dict.lunch[Math.floor(Math.random() * RAND_RESTAURANT)],
-      dinner = dict.dinner[Math.floor(Math.random() * RAND_RESTAURANT)];
+      breakfast = glbl_dict.breakfast[static.rand(RAND_RESTAURANT)], 
+      lunch  = glbl_dict.lunch[static.rand(RAND_RESTAURANT)],
+      dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];
 
-  console.log(lunch);
   /* Make sure eateries are unique */
   while (lunch[0] === breakfast[0]) {
-    lunch = dict.lunch[Math.floor(Math.random() * RAND_RESTAURANT)];
+    lunch = glbl_dict.lunch[static.rand(RAND_RESTAURANT)];
   }
   while (dinner[0] === lunch[0] || dinner[0] === breakfast[0]) {
-    dinner = dict.dinner[Math.floor(Math.random() * RAND_RESTAURANT)];
+    dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];
   }
 
-  /* Generate randomized output to display */
+  /* Generate randomized landmark ouput to display */
   for (var i = 0; i < num_landmarks; ++i) {
-    var randomized = Math.floor(Math.random() * (output.length - 1));
+    var randomized = static.rand(output.length - 1);
 
     while (output[randomized] == null) {
-      randomized = Math.floor(Math.random() * (output.length - 1));
+      randomized = static.rand(output.length - 1);
     }
 
     rows[i] = output[randomized];
     output[randomized] = null;
+
+    /* Fux with time stuff */
+    var open = rows[i][3],
+        close = rows[i][4];
   }
 
-  /* Output */
-  res.render(
-      'form', 
+  /* Build add output to be rendered to global state */
+  glbl_dict.output = 
       {city: city,
        events: rows,
        breakfast: breakfast,
        lunch: lunch,
        dinner: dinner
-      }
-  );
+      };
+
+  /* Render */
+  render_form_itinerary(res);
 }
 
 
@@ -281,4 +354,9 @@ var render_new_itinerary = function(res, dict, db_out) {
 /* Display the form without output */
 var render_cityform = function(res) {
   res.render('form');
+}
+
+/* Display the form with output */
+var render_form_itinerary = function(res) {
+  res.render('form', glbl_dict.output);
 }

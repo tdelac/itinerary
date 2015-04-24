@@ -76,19 +76,21 @@ module.exports = {
           + "WHERE rownum <= " + rows);
   },
 
-  get_landmark_by_stars_weighted: function(city_name, rows) {
+  get_landmark_by_stars_weighted: function(city_name, day, rows) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address "
-            + "FROM business b "
+            + "SELECT b.name, b.stars, b.address, bh.open, bh.close "
+            + "FROM (business b "
               + "INNER JOIN landmark l "
-              + "ON b.business_id = l.business_id "
-            + "WHERE b.city = " + city_name + " "
+              + "ON b.business_id = l.business_id) "
+              + "INNER JOIN business_hours bh "
+              + "ON b.business_id = bh.business_id "
+            + "WHERE b.city = " + city_name + " AND bh.day = " + day + " "
             + "ORDER BY (b.review_count * b.stars) desc) "
             + "SELECT * FROM weighted_stars "
             + "WHERE rownum <= " + rows);
   },
 
-  get_breakfast_by_stars_weighted: function(city_name, rows) {
+  get_breakfast_by_stars_weighted: function(city_name, day, rows) {
     return ("WITH weighted_stars AS ( "
             + "SELECT b.name, b.stars, b.address "
             + "FROM business b "
@@ -102,7 +104,7 @@ module.exports = {
             + "WHERE rownum <= " + rows);
   },
 
-  get_lunch_by_stars_weighted: function(city_name, rows) {
+  get_lunch_by_stars_weighted: function(city_name, day, rows) {
     return ("WITH weighted_stars AS ( "
             + "SELECT b.name, b.stars, b.address "
             + "FROM business b "
@@ -116,7 +118,7 @@ module.exports = {
             + "WHERE rownum <= " + rows);
   },
 
-  get_dinner_by_stars_weighted: function(city_name, rows) {
+  get_dinner_by_stars_weighted: function(city_name, day, rows) {
     return ("WITH weighted_stars AS ( "
             + "SELECT b.name, b.stars, b.address "
             + "FROM business b "

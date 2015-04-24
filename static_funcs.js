@@ -12,5 +12,9 @@ module.exports = {
     }
 
     return output;
+  },
+
+  rand: function(scale) {
+    return Math.floor(Math.random() * scale);
   }
 }
