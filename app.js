@@ -60,8 +60,11 @@ passport.use(new FacebookStrategy({
     process.nextTick(function () {
           
       facebook.getFbData(accessToken, '/me/friends', function(data){
-          // returns friends who have logged in with the app
-          console.log(data);
+          // data is given as a string so either parse or use re: /(.*\[+)(.*)(\].*)/;
+          var obj = JSON.parse(data);
+          var friends = obj.data;
+          console.log(friends);
+          glbl_dict.friends = friends;
       });
       // To keep the example simple, the user's Facebook profile is returned to
       // represent the logged-in user.  In a typical application, you would want
@@ -91,19 +94,17 @@ var app = express();
 
 
 /* If direct to 'home' page */
-app.get('/', function(req, res) {
+app.get('/', ensureAuthenticated, function(req, res) {
   process_cityform(req, res);
 });
 
 /* On post request from form submission */
-app.post('/', function(req, res) {
+app.post('/', ensureAuthenticated, function(req, res) {
   process_cityform_post(req, res);
 });
 
-
-
 app.get('/account', ensureAuthenticated, function(req, res){
-  res.render('account', { user: req.user });
+  res.render('account', { user: req.user, friends: glbl_dict.friends });
 });
 
 app.get('/login', function(req, res){
