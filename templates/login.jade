@@ -1,2 +1,26 @@
-a(href="/auth/facebook")
-  img(src="login-with-facebook.png" width="154" height="22")
+html
+  head
+    link(href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css', rel='stylesheet')
+  div(class="background-image")
+  style body {background-image:url('https://newevolutiondesigns.com/images/freebies/city-wallpaper-18.jpg');
+  body
+    .navbar.navbar-default.navbar-fixed-top(role='navigation')
+      .container
+        .navbar-collapse.collapse
+          ul.nav.navbar-nav
+            li
+              a(href='/') Home
+            li
+              a(href='#') Account
+                
+    br
+    br
+    br
+    br
+    div.container
+        center.jumbotron
+          div.page-header
+            h1 Please Log in!
+          p in order to use Itinerary we ask that you authenticate your account.
+          a(href="/auth/facebook")
+            img(src="login-with-facebook-big.png" width="400")

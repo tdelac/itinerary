@@ -18,9 +18,22 @@ html
     br
     br
     div.container
-        div.jumbotron
-          div.page-header
-            h1 Account Details
-              small   courtesy of facebook
-          p ID: #{user.id}
-          p Name: #{user.displayName}
+      div.row
+        div.col-md-12
+          div.jumbotron(style="background-color:#fff")
+            div.page-header
+              h1 Account Details
+                small   courtesy of facebook
+            p ID: #{user.id}
+            p Name: #{user.displayName}
+            br
+            h3 Your friends who use itinerary:
+            div
+              table.table.table-striped
+                thead
+                tbody
+                  each friend in friends
+                    tr
+                      td #{friend.name}
+                      td #{friend.id}
+                   
