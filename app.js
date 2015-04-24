@@ -180,7 +180,6 @@ var process_cityform_post = function(req, res) {
     }
 
     glbl_dict.output.breakfast = new_breakfast; // Update global
-    console.log(glbl_dict);
     render_form_itinerary(res);
     return;
   }
