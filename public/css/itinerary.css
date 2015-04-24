@@ -1,0 +1,14 @@
+.inline button {
+  display: block;
+  float: left;
+}
+
+.inline p {
+  display: block;
+  float: left;
+}
+
+.glyphicon {
+  margin-top: 8px;
+  font-size: 20px;
+}

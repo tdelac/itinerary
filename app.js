@@ -58,14 +58,10 @@ passport.use(new FacebookStrategy({
   function(accessToken, refreshToken, profile, done) {
     // asynchronous verification, for effect...
     process.nextTick(function () {
-
-      // gets friends who have logged in with the app
+          
       facebook.getFbData(accessToken, '/me/friends', function(data){
-          // data is given as a string so either parse or use re: /(.*\[+)(.*)(\].*)/;
-          var obj = JSON.parse(data)
-          var friends = obj.data
-          console.log(friends);
-          glbl_dict.friends = friends
+          // returns friends who have logged in with the app
+          console.log(data);
       });
       // To keep the example simple, the user's Facebook profile is returned to
       // represent the logged-in user.  In a typical application, you would want
@@ -80,7 +76,7 @@ passport.use(new FacebookStrategy({
 var app = express();
 
 // configure Express
-  app.set('views', path.join(__dirname, 'templates'));
+  app.set('views', path.join(__dirname, 'public'));
   app.set('view engine', 'jade');
   app.use(logger());
   app.use(cookieParser());
@@ -95,19 +91,19 @@ var app = express();
 
 
 /* If direct to 'home' page */
-app.get('/', ensureAuthenticated, function(req, res) {
+app.get('/', function(req, res) {
   process_cityform(req, res);
 });
 
 /* On post request from form submission */
-app.post('/',ensureAuthenticated, function(req, res) {
+app.post('/', function(req, res) {
   process_cityform_post(req, res);
 });
 
 
 
 app.get('/account', ensureAuthenticated, function(req, res){
-    res.render('account', { user: req.user, friends: glbl_dict.friends});
+  res.render('account', { user: req.user });
 });
 
 app.get('/login', function(req, res){
@@ -309,19 +305,12 @@ var process_dinner = function(res, db_out) {
 /* Display the form with output */
 var make_new_itinerary = function(res, db_out) {
   glbl_dict.landmarks = db_out.rows;
-  for (var i = 0; i < glbl_dict.landmarks.length; ++i) {
-    /* Fux with time stuff */
-    var open = static.get_format_time(glbl_dict.landmarks[i][3]),
-        close = static.get_format_time(glbl_dict.landmarks[i][4]);
 
-    if (open === close) {
-      glbl_dict.landmarks[i][3] = "Open 24 hours";
-      glbl_dict.landmarks[i][4] = "";
-    } else {
-      glbl_dict.landmarks[i][3] = open;
-      glbl_dict.landmarks[i][4] = close;
-    }
-  }
+  // Pretty format time for all recs
+  static.format_time(glbl_dict.landmarks);
+  static.format_time(glbl_dict.breakfast);
+  static.format_time(glbl_dict.lunch);
+  static.format_time(glbl_dict.dinner);
 
   var output = static.array_deep_copy(glbl_dict.landmarks),
       city = glbl_dict.city,

@@ -92,11 +92,14 @@ module.exports = {
 
   get_breakfast_by_stars_weighted: function(city_name, day, rows) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address "
-            + "FROM business b "
+            + "SELECT b.name, b.stars, b.address, bh.open, bh.close "
+            + "FROM (business b "
               + "INNER JOIN restaurant r "
-              + "ON b.business_id = r.business_id "
-            + "WHERE b.city = " + city_name + " AND " 
+              + "ON b.business_id = r.business_id) "
+              + "INNER JOIN business_hours bh "
+              + "ON b.business_id = bh.business_id "
+            + "WHERE bh.day = " + day + " AND b.city = " + city_name 
+              + " AND extract(hour from bh.open) < 10 AND extract(hour from bh.close) > 13 AND " 
               + "(r.breakfast = 1 OR r.brunch = 1 OR "
               + "(r.breakfast = 0 AND r.brunch = 0 AND r.lunch = 0 AND r.dinner = 0 AND r.dessert = 0 AND r.latenight = 0)) "
             + "ORDER BY (b.review_count * b.stars) desc) "
@@ -106,11 +109,14 @@ module.exports = {
 
   get_lunch_by_stars_weighted: function(city_name, day, rows) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address "
-            + "FROM business b "
+            + "SELECT b.name, b.stars, b.address, bh.open, bh.close "
+            + "FROM (business b "
               + "INNER JOIN restaurant r "
-              + "ON b.business_id = r.business_id "
-            + "WHERE b.city = " + city_name + " AND " 
+              + "ON b.business_id = r.business_id) "
+              + "INNER JOIN business_hours bh "
+              + "ON b.business_id = bh.business_id "
+            + "WHERE bh.day = " + day + " AND b.city = " + city_name 
+              + " AND extract(hour from bh.open) < 12 AND extract(hour from bh.close) > 16 AND " 
               + "(r.brunch = 1 OR r.lunch = 1 OR "
               + "(r.breakfast = 0 AND r.brunch = 0 AND r.lunch = 0 AND r.dinner = 0 AND r.dessert = 0 AND r.latenight = 0)) "
             + "ORDER BY (b.review_count * b.stars) desc) "
@@ -120,11 +126,14 @@ module.exports = {
 
   get_dinner_by_stars_weighted: function(city_name, day, rows) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address "
-            + "FROM business b "
+            + "SELECT b.name, b.stars, b.address, bh.open, bh.close "
+            + "FROM (business b "
               + "INNER JOIN restaurant r "
-              + "ON b.business_id = r.business_id "
-            + "WHERE b.city = " + city_name + " AND " 
+              + "ON b.business_id = r.business_id) "
+              + "INNER JOIN business_hours bh "
+              + "ON b.business_id = bh.business_id "
+            + "WHERE bh.day = " + day + " AND b.city = " + city_name 
+              + " AND extract(hour from bh.open) < 17 AND extract(hour from bh.close) > 20 AND " 
               + "(r.dinner = 1 OR r.latenight = 1 OR "
               + "(r.breakfast = 0 AND r.brunch = 0 AND r.lunch = 0 AND r.dinner = 0 AND r.dessert = 0 AND r.latenight = 0)) "
             + "ORDER BY (b.review_count * b.stars) desc) "
