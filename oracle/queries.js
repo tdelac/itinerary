@@ -91,9 +91,9 @@ module.exports = {
   },
 
   /* Note: landmarks do not include 24hr establishments. Issues? */
-  get_morning_landmark_by_stars_weighted: function(city_name, day, rows) {
+  get_morning_landmark_by_stars_dist_weighted: function(city_name, day, rows, lat, long) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address, bh.open, bh.close "
+            + "SELECT b.name, b.stars, b.address, bh.open, bh.close, b.latitude, b.longitude "
             + "FROM (business b "
               + "INNER JOIN landmark l "
               + "ON b.business_id = l.business_id) "
@@ -101,14 +101,20 @@ module.exports = {
               + "ON b.business_id = bh.business_id "
             + "WHERE b.city = " + city_name + " AND bh.day = " + day + "AND "
               + "extract(hour from bh.close) > 9 AND extract(hour from bh.open) < 13 "
-            + "ORDER BY (b.review_count * b.stars) desc) "
+            + "ORDER BY (b.review_count * b.stars) desc), "
+          + "review_ordered AS ( "
             + "SELECT * FROM weighted_stars "
-            + "WHERE rownum <= " + rows);
+            + "WHERE rownum <= " + rows + ") "
+            + "SELECT ro.name, ro.stars, ro.address, ro.open, ro.close " 
+            + "FROM review_ordered ro "
+            + "ORDER BY (ACOS(SIN(3.14*ro.latitude/180.0)*SIN(3.14*"+lat+"/180.0)+" 
+              + "COS(3.14*ro.latitude/180.0)*COS(3.14*"+lat+"/180.0)*"
+              + "COS(3.14*"+long+"/180.0-3.14*ro.longitude/180.0))) ASC");
   },
 
-  get_afternoon_landmark_by_stars_weighted: function(city_name, day, rows) {
+  get_afternoon_landmark_by_stars_dist_weighted: function(city_name, day, rows, lat, long) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address, bh.open, bh.close "
+            + "SELECT b.name, b.stars, b.address, bh.open, bh.close, b.latitude, b.longitude "
             + "FROM (business b "
               + "INNER JOIN landmark l "
               + "ON b.business_id = l.business_id) "
@@ -116,14 +122,20 @@ module.exports = {
               + "ON b.business_id = bh.business_id "
             + "WHERE b.city = " + city_name + " AND bh.day = " + day + "AND "
               + "extract(hour from bh.close) > 12 AND extract(hour from bh.open) < 19 "
-            + "ORDER BY (b.review_count * b.stars) desc) "
+            + "ORDER BY (b.review_count * b.stars) desc), "
+          + "review_ordered AS ( "
             + "SELECT * FROM weighted_stars "
-            + "WHERE rownum <= " + rows);
+            + "WHERE rownum <= " + rows + ") "
+            + "SELECT ro.name, ro.stars, ro.address, ro.open, ro.close " 
+            + "FROM review_ordered ro "
+            + "ORDER BY (ACOS(SIN(3.14*ro.latitude/180.0)*SIN(3.14*"+lat+"/180.0)+" 
+              + "COS(3.14*ro.latitude/180.0)*COS(3.14*"+lat+"/180.0)*"
+              + "COS(3.14*"+long+"/180.0-3.14*ro.longitude/180.0))) ASC");
   },
 
-  get_evening_landmark_by_stars_weighted: function(city_name, day, rows) {
+  get_evening_landmark_by_stars_dist_weighted: function(city_name, day, rows, lat, long) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address, bh.open, bh.close "
+            + "SELECT b.name, b.stars, b.address, bh.open, bh.close, b.latitude, b.longitude "
             + "FROM (business b "
               + "INNER JOIN landmark l "
               + "ON b.business_id = l.business_id) "
@@ -132,14 +144,20 @@ module.exports = {
             + "WHERE b.city = " + city_name + " AND bh.day = " + day + "AND "
               + "(extract(hour from bh.close) > 20 OR extract(hour from bh.close) < 7) AND "
               + "(extract(hour from bh.open) < 23 OR extract(hour from bh.open) < 2) "
-            + "ORDER BY (b.review_count * b.stars) desc) "
+            + "ORDER BY (b.review_count * b.stars) desc), "
+          + "review_ordered AS ( "
             + "SELECT * FROM weighted_stars "
-            + "WHERE rownum <= " + rows);
+            + "WHERE rownum <= " + rows + ") "
+            + "SELECT ro.name, ro.stars, ro.address, ro.open, ro.close " 
+            + "FROM review_ordered ro "
+            + "ORDER BY (ACOS(SIN(3.14*ro.latitude/180.0)*SIN(3.14*"+lat+"/180.0)+" 
+              + "COS(3.14*ro.latitude/180.0)*COS(3.14*"+lat+"/180.0)*"
+              + "COS(3.14*"+long+"/180.0-3.14*ro.longitude/180.0))) ASC");
   },
 
   get_breakfast_by_stars_weighted: function(city_name, day, rows) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address, bh.open, bh.close "
+            + "SELECT b.name, b.stars, b.address, bh.open, bh.close, b.latitude, b.longitude "
             + "FROM (business b "
               + "INNER JOIN restaurant r "
               + "ON b.business_id = r.business_id) "
@@ -157,7 +175,7 @@ module.exports = {
 
   get_lunch_by_stars_weighted: function(city_name, day, rows) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address, bh.open, bh.close "
+            + "SELECT b.name, b.stars, b.address, bh.open, bh.close, b.latitude, b.longitude "
             + "FROM (business b "
               + "INNER JOIN restaurant r "
               + "ON b.business_id = r.business_id) "
@@ -175,7 +193,7 @@ module.exports = {
 
   get_dinner_by_stars_weighted: function(city_name, day, rows) {
     return ("WITH weighted_stars AS ( "
-            + "SELECT b.name, b.stars, b.address, bh.open, bh.close "
+            + "SELECT b.name, b.stars, b.address, bh.open, bh.close, b.latitude, b.longitude "
             + "FROM (business b "
               + "INNER JOIN restaurant r "
               + "ON b.business_id = r.business_id) "

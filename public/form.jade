@@ -87,7 +87,8 @@ html
                                 button.btn.btn-link(type='submit')
                                   span.glyphicon.glyphicon-thumbs-down
                         else 
-                          td= field
+                          if i < 4
+                            td= field
                   each event, i in morning
                     tr
                       if event
@@ -131,7 +132,8 @@ html
                                 button.btn.btn-link(type='submit')
                                   span.glyphicon.glyphicon-thumbs-down
                         else
-                          td= field
+                          if i < 4
+                            td= field
                   each event, i in afternoon
                     tr
                       if event
@@ -175,7 +177,8 @@ html
                                 button.btn.btn-link(type='submit')
                                   span.glyphicon.glyphicon-thumbs-down
                         else
-                          td= field
+                          if i < 4
+                            td= field
                   each event, i in evening
                     tr
                       if event

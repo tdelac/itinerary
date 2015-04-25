@@ -291,6 +291,10 @@ var process_cityform_data = function(res, db_out) {
 var process_breakfast = function(res, db_out) {
   glbl_dict.breakfast = db_out.rows;
   
+  /* Pre-determine breakfast for morning query info */
+  glbl_dict.output.breakfast 
+    = glbl_dict.breakfast[static.rand(RAND_RESTAURANT)]; 
+
   var sql = 
     queries.get_lunch_by_stars_weighted
       ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT);
@@ -302,6 +306,15 @@ var process_breakfast = function(res, db_out) {
 var process_lunch = function(res, db_out) {
   glbl_dict.lunch = db_out.rows;
   
+  var breakfast = glbl_dict.output.breakfast,
+      lunch = glbl_dict.lunch[static.rand(RAND_RESTAURANT)];
+
+  /* Make sure eateries are unique */
+  while (lunch[0] === breakfast[0]) {
+    lunch = glbl_dict.lunch[static.rand(RAND_RESTAURANT)];
+  }
+  glbl_dict.output.lunch = lunch;
+
   var sql = 
     queries.get_dinner_by_stars_weighted
       ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT);
@@ -312,10 +325,26 @@ var process_lunch = function(res, db_out) {
 /* Process dinner search query */
 var process_dinner = function(res, db_out) {
   glbl_dict.dinner = db_out.rows;
-  
+
+  var breakfast = glbl_dict.output.breakfast,
+      lunch = glbl_dict.output.lunch,
+      dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];
+
+  while (dinner[0] === lunch[0] || dinner[0] === breakfast[0]) {
+    dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];
+  }
+
+  glbl_dict.output.dinner = dinner;
+
+  // Anchor these events to lunch
   var sql = 
-    queries.get_morning_landmark_by_stars_weighted
-      ("'" + glbl_dict.city + "'", glbl_dict.day, glbl_dict.num_morning * RAND_BUFFER);
+    queries.get_morning_landmark_by_stars_dist_weighted(
+        "'" + glbl_dict.city + "'" 
+      , glbl_dict.day 
+      , glbl_dict.num_morning * RAND_BUFFER
+      , glbl_dict.output.lunch[5] // lat
+      , glbl_dict.output.lunch[6] // long
+    );
 
   db(sql, res, process_morning_landmarks);
 }
@@ -325,8 +354,13 @@ var process_morning_landmarks = function(res, db_out) {
   glbl_dict.morning_landmarks = db_out.rows;
   
   var sql = 
-    queries.get_afternoon_landmark_by_stars_weighted
-      ("'" + glbl_dict.city + "'", glbl_dict.day, glbl_dict.num_afternoon * RAND_BUFFER);
+    queries.get_afternoon_landmark_by_stars_dist_weighted(
+        "'" + glbl_dict.city + "'"
+      , glbl_dict.day
+      , glbl_dict.num_afternoon * RAND_BUFFER
+      , glbl_dict.output.lunch[5] // lat
+      , glbl_dict.output.lunch[6] // long
+    );
 
   db(sql, res, process_afternoon_landmarks);
 }
@@ -336,8 +370,13 @@ var process_afternoon_landmarks = function(res, db_out) {
   glbl_dict.afternoon_landmarks = db_out.rows;
   
   var sql = 
-    queries.get_evening_landmark_by_stars_weighted
-      ("'" + glbl_dict.city + "'", glbl_dict.day, glbl_dict.num_evening * RAND_BUFFER);
+    queries.get_evening_landmark_by_stars_dist_weighted(
+        "'" + glbl_dict.city + "'"
+      , glbl_dict.day
+      , glbl_dict.num_evening * RAND_BUFFER
+      , glbl_dict.output.dinner[5]
+      , glbl_dict.output.dinner[6]
+    );
 
   db(sql, res, make_new_itinerary);
 }
@@ -357,38 +396,21 @@ var make_new_itinerary = function(res, db_out) {
   var all_morning = static.array_deep_copy(glbl_dict.morning_landmarks),
       all_afternoon = static.array_deep_copy(glbl_dict.afternoon_landmarks),
       all_evening = static.array_deep_copy(glbl_dict.evening_landmarks),
-      city = glbl_dict.city,
-      num_landmarks = glbl_dict.num_landmarks,
-      breakfast = glbl_dict.breakfast[static.rand(RAND_RESTAURANT)], 
-      lunch  = glbl_dict.lunch[static.rand(RAND_RESTAURANT)],
-      dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];
-
-  /* Make sure eateries are unique */
-  while (lunch[0] === breakfast[0]) {
-    lunch = glbl_dict.lunch[static.rand(RAND_RESTAURANT)];
-  }
-  while (dinner[0] === lunch[0] || dinner[0] === breakfast[0]) {
-    dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];
-  }
+      city = glbl_dict.city;
 
   /* Retrieve all landmark activities */
   var morning = 
-    static.rand_unique_subset(all_morning, glbl_dict.num_morning, []);
+    static.closest_unique_set(all_morning, glbl_dict.num_morning, []);
   var afternoon = 
-    static.rand_unique_subset(all_afternoon, glbl_dict.num_afternoon, morning);
+    static.closest_unique_set(all_afternoon, glbl_dict.num_afternoon, morning);
   var evening = 
-    static.rand_unique_subset(all_evening, glbl_dict.num_evening, morning.concat(afternoon));
+    static.closest_unique_set(all_evening, glbl_dict.num_evening, morning.concat(afternoon));
 
   /* Build add output to be rendered to global state */
-  glbl_dict.output = 
-      {city: city,
-       morning: morning,
-       afternoon: afternoon,
-       evening: evening,
-       breakfast: breakfast,
-       lunch: lunch,
-       dinner: dinner
-      };
+  glbl_dict.output.city = city;
+  glbl_dict.output.morning = morning;
+  glbl_dict.output.afternoon = afternoon;
+  glbl_dict.output.evening = evening;
 
   /* Render */
   render_form_itinerary(res);

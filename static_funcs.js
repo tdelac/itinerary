@@ -102,11 +102,35 @@ rand_unique_event = function(set, to_compare) {
   return result;
 }
 
+closest_unique_set = function(set, result_size, to_compare) {
+  var result = [], 
+      k = 0;
+
+  // Gross, but necessary
+  for (var i = 0; i < set.length; ++i) {
+    for (var j = 0; j < to_compare.length; ++j) {
+      if (set[i][0] === to_compare[j][0]) {
+        set[i] = null;
+        break;
+      }
+    }
+  }
+
+  for (var i = 0; i < result_size; ++i) {
+    while (k < set.length && set[k] == null) {k++}
+    result[i] = set[k];
+    k++;
+  }
+
+  return result;
+}
+
 module.exports = {
   array_deep_copy: array_deep_copy,
   rand: rand, 
   get_formatted_time: get_formatted_time, 
   format_time: format_time,
   rand_unique_subset: rand_unique_subset,
-  rand_unique_event: rand_unique_event
+  rand_unique_event: rand_unique_event,
+  closest_unique_set: closest_unique_set
 }
