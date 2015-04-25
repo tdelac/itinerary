@@ -131,7 +131,7 @@ module.exports = {
               + "ON b.business_id = bh.business_id "
             + "WHERE b.city = " + city_name + " AND bh.day = " + day + "AND "
               + "(extract(hour from bh.close) > 20 OR extract(hour from bh.close) < 7) AND "
-              + "(extract(hour from bh.open) < 23 OR extract(hour from bh.close) < 2) "
+              + "(extract(hour from bh.open) < 23 OR extract(hour from bh.open) < 2) "
             + "ORDER BY (b.review_count * b.stars) desc) "
             + "SELECT * FROM weighted_stars "
             + "WHERE rownum <= " + rows);

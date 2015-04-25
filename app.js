@@ -17,7 +17,7 @@ var facebook = require('./facebook');
 var FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID();
 var FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET();
 var RAND_BUFFER = 20;
-var RAND_RESTAURANT = RAND_BUFFER * 5;
+var RAND_RESTAURANT = RAND_BUFFER;
 var WEEKDAY = new Array(7);
 WEEKDAY[0] = "\'Su\'";
 WEEKDAY[1] = "\'M\'";
@@ -348,6 +348,10 @@ var make_new_itinerary = function(res, db_out) {
       breakfast = glbl_dict.breakfast[static.rand(RAND_RESTAURANT)], 
       lunch  = glbl_dict.lunch[static.rand(RAND_RESTAURANT)],
       dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];
+
+  console.log(all_morning);
+  console.log(all_afternoon);
+  console.log(all_evening);
 
   /* Make sure eateries are unique */
   while (lunch[0] === breakfast[0]) {
