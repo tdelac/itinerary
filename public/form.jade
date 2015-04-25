@@ -57,70 +57,11 @@ html
         if city
           div
             block content
-              a(name='breakfast')
+              a(name='morning')
               h2 Your day in #{city} could be something like
-              if breakfast
-              table
-                tr
-                  td
-                    p Breakfast
-                  td
-                    form(action='/#breakfast', method='post')
-                      input(type='hidden', value='non-null', name='new_breakfast')
-                      button.btn.btn-link(type='submit')
-                        span.glyphicon.glyphicon-thumbs-down
-
-              table.table.table-condensed.table-hover
-                tr
-                each field in breakfast
-                  td= field
-
-              a(name='lunch')
-              if lunch
-              table
-                tr
-                  td
-                    p Lunch
-                  td
-                    form(action='/#lunch', method='post')
-                      input(type='hidden', value='non-null', name='new_lunch')
-                      button.btn.btn-link(type='submit')
-                        span.glyphicon.glyphicon-thumbs-down
-
-              table.table.table-condensed.table-hover
-                tr
-                each field in lunch
-                  td= field
-
-              a(name='dinner')
-              if dinner
-              table
-                tr
-                  td
-                    p Dinner
-                  td
-                    form(action='/#dinner', method='post')
-                      input(type='hidden', value='non-null', name='new_dinner')
-                      button.btn.btn-link(type='submit')
-                        span.glyphicon.glyphicon-thumbs-down
-
-              table.table.table-condensed.table-hover
-                tr
-                each field in dinner
-                  td= field
-
-              a(name='landmarks')
-              table
-                tr
-                  td
-                    p Landmarks
-                  td
-                    form(action='/#landmarks', method='post')
-                      input(type='hidden', value='non-null', name='refresh')
-                      button.btn.btn-link(type='submit')
-                        span.glyphicon.glyphicon-thumbs-down
 
               if morning
+                p Morning
                 table.table.table-condensed.table-hover
                   tr
                     td= 'Name'
@@ -128,12 +69,43 @@ html
                     td= 'Address'
                     td= 'Opening'
                     td= 'Closing'
-                    each event in morning
-                      tr
-                        if event
-                          each field in event
+                  if breakfast
+                    tr
+                    each field, i in breakfast
+                      if i==0
+                        td
+                          div.control-group
+                            span.glyphicon.glyphicon-cutlery
+                            label.inline-glyph= field
+                      else 
+                        if i==4
+                          td
+                            div.control-group
+                              form.slim-row(action='/#morning', method='post')
+                                label.inline-glyph= field
+                                input(type='hidden', value='non-null', name='new_breakfast')
+                                button.btn.btn-link(type='submit')
+                                  span.glyphicon.glyphicon-thumbs-down
+                        else 
+                          td= field
+                  each event, i in morning
+                    tr
+                      if event
+                        each field, j in event
+                          if j==4
+                            td
+                              div.control-group
+                                form.slim-row(action='/#morning', method='post')
+                                  label.inline-glyph= field
+                                  input(type='hidden', value= i, name='new_morning')
+                                  button.btn.btn-link(type='submit')
+                                    span.glyphicon.glyphicon-thumbs-down
+                          else 
                             td= field
+
               if afternoon
+                a(name='afternoon')
+                p Afternoon
                 table.table.table-condensed.table-hover
                   tr
                     td= 'Name'
@@ -141,12 +113,43 @@ html
                     td= 'Address'
                     td= 'Opening'
                     td= 'Closing'
-                    each event in afternoon
-                      tr
-                        if event
-                          each field in event
+                  if lunch
+                    tr
+                    each field, i in lunch
+                      if i==0
+                        td
+                          div.control-group
+                            span.glyphicon.glyphicon-cutlery
+                            label.inline-glyph= field
+                      else 
+                        if i==4
+                          td
+                            div.control-group
+                              form.slim-row(action='/#afternoon', method='post')
+                                label.inline-glyph= field
+                                input(type='hidden', value='non-null', name='new_lunch')
+                                button.btn.btn-link(type='submit')
+                                  span.glyphicon.glyphicon-thumbs-down
+                        else
+                          td= field
+                  each event, i in afternoon
+                    tr
+                      if event
+                        each field, j in event
+                          if j==4
+                            td
+                              div.control-group
+                                form.slim-row(action='/#afternoon', method='post')
+                                  label.inline-glyph= field
+                                  input(type='hidden', value= i, name='new_afternoon')
+                                  button.btn.btn-link(type='submit')
+                                    span.glyphicon.glyphicon-thumbs-down
+                          else 
                             td= field
+
               if evening
+                a(name='evening')
+                p Evening
                 table.table.table-condensed.table-hover
                   tr
                     td= 'Name'
@@ -154,8 +157,36 @@ html
                     td= 'Address'
                     td= 'Opening'
                     td= 'Closing'
-                    each event in evening
-                      tr
-                        if event
-                          each field in event
+                  if dinner
+                    tr
+                    each field, i in dinner
+                      if i==0
+                        td
+                          div.control-group
+                            span.glyphicon.glyphicon-cutlery
+                            label.inline-glyph= field
+                      else 
+                        if i==4
+                          td
+                            div.control-group
+                              form.slim-row(action='/#evening', method='post')
+                                label.inline-glyph= field
+                                input(type='hidden', value='non-null', name='new_dinner')
+                                button.btn.btn-link(type='submit')
+                                  span.glyphicon.glyphicon-thumbs-down
+                        else
+                          td= field
+                  each event, i in evening
+                    tr
+                      if event
+                        each field, j in event
+                          if j==4
+                            td
+                              div.control-group
+                                form.slim-row(action='/#evening', method='post')
+                                  label.inline-glyph= field
+                                  input(type='hidden', value= i, name='new_evening')
+                                  button.btn.btn-link(type='submit')
+                                    span.glyphicon.glyphicon-thumbs-down
+                          else 
                             td= field

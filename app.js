@@ -220,21 +220,35 @@ var process_cityform_post = function(req, res) {
   }
 
   /* If user requests new set of landmarks */
-  if (req.body.hasOwnProperty('refresh')) {
+  if (req.body.hasOwnProperty('new_morning')) {
     var all_morning = static.array_deep_copy(glbl_dict.morning_landmarks),
-        all_afternoon = static.array_deep_copy(glbl_dict.afternoon_landmarks),
-        all_evening = static.array_deep_copy(glbl_dict.evening_landmarks);
+        index = req.body.new_morning;
 
-    var morning = 
-      static.rand_unique_subset(all_morning, glbl_dict.num_morning, []);
-    var afternoon = 
-      static.rand_unique_subset(all_afternoon, glbl_dict.num_afternoon, morning);
-    var evening = 
-      static.rand_unique_subset(all_evening, glbl_dict.num_evening, morning.concat(afternoon));
+    var new_event = static.rand_unique_event(all_morning, glbl_dict.output);
 
-    glbl_dict.output.morning = morning;
-    glbl_dict.output.afternoon = afternoon;
-    glbl_dict.output.evening = evening;
+    glbl_dict.output.morning[index] = new_event;
+    render_form_itinerary(res);
+    return;
+  } 
+
+  if (req.body.hasOwnProperty('new_afternoon')) {
+    var all_afternoon = static.array_deep_copy(glbl_dict.afternoon_landmarks),
+        index = req.body.new_afternoon;
+
+    var new_event = static.rand_unique_event(all_afternoon, glbl_dict.output);
+
+    glbl_dict.output.afternoon[index] = new_event;
+    render_form_itinerary(res);
+    return;
+  } 
+
+  if (req.body.hasOwnProperty('new_evening')) {
+    var all_evening = static.array_deep_copy(glbl_dict.evening_landmarks),
+        index = req.body.new_evening;
+
+    var new_event = static.rand_unique_event(all_evening, glbl_dict.output);
+
+    glbl_dict.output.evening[index] = new_event;
     render_form_itinerary(res);
     return;
   } 
@@ -251,8 +265,8 @@ var process_cityform_post = function(req, res) {
 
     /* Setup the global itinerary object */
     glbl_dict.city = city;
-    glbl_dict.num_morning = Math.ceil(num_landmarks / 3);
-    glbl_dict.num_evening = Math.ceil((num_landmarks - glbl_dict.num_morning) / 6);
+    glbl_dict.num_morning = Math.ceil(num_landmarks / 4);
+    glbl_dict.num_evening = Math.ceil((num_landmarks - glbl_dict.num_morning) / 4);
     glbl_dict.num_afternoon = 
       num_landmarks - glbl_dict.num_morning - glbl_dict.num_evening;
 
@@ -348,10 +362,6 @@ var make_new_itinerary = function(res, db_out) {
       breakfast = glbl_dict.breakfast[static.rand(RAND_RESTAURANT)], 
       lunch  = glbl_dict.lunch[static.rand(RAND_RESTAURANT)],
       dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];
-
-  console.log(all_morning);
-  console.log(all_afternoon);
-  console.log(all_evening);
 
   /* Make sure eateries are unique */
   while (lunch[0] === breakfast[0]) {

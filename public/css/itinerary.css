@@ -8,7 +8,20 @@
   float: left;
 }
 
-.glyphicon {
-  margin-top: 8px;
-  font-size: 20px;
+.glyphicon-cutlery {
+  margin-top: 0.4em;
+  font-size: 0.8em;
+  margin-right: 0.7em
+}
+
+.inline-glyph {
+  margin-bottom: 0px;
+  vertical-align: top;
+  font-weight: 500;
+  font-size: 1.1em;
+}
+
+.slim-row {
+  margin-bottom: 0em;
+  padding-bottom: 0em;
 }

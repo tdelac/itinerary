@@ -65,6 +65,40 @@ rand_unique_subset = function(set, result_size, to_compare) {
     set[randomized] = null;
   }
 
+  return result
+}
+
+rand_unique_event = function(set, to_compare) {
+  var morning = to_compare.morning,
+      afternoon = to_compare.afternoon,
+      evening = to_compare.evening,
+      result;
+
+  for (var i = 0; i < set.length; ++i) {
+    for (var j = 0; j < morning.length; ++j) {
+      if (set[i][0] === morning[j][0]) {
+        set[i] = null;
+        break;
+      }
+    }
+    if (set[i] === null) continue;
+    for (var j = 0; j < afternoon.length; ++j) {
+      if (set[i][0] === afternoon[j][0]) {
+        set[i] = null;
+        break;
+      }
+    }
+    if (set[i] === null) continue;
+    for (var j = 0; j < evening.length; ++j) {
+      if (set[i][0] === evening[j][0]) {
+        set[i] = null;
+        break;
+      }
+    }
+  }
+
+  while ((result = set[rand(set.length)]) == null) {}
+
   return result;
 }
 
@@ -73,5 +107,6 @@ module.exports = {
   rand: rand, 
   get_formatted_time: get_formatted_time, 
   format_time: format_time,
-  rand_unique_subset: rand_unique_subset
+  rand_unique_subset: rand_unique_subset,
+  rand_unique_event: rand_unique_event
 }
