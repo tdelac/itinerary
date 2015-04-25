@@ -26,7 +26,7 @@ html
             br
             label(for='select_city') Please select the city you would like to visit!
               form(action='/', method='post')
-                div 
+                div
                   select(class="form-control" id='select_city' name='selector')
                     option(value='Las Vegas') Las Vegas, NV
                     option(value='Phoenix') Phoenix, AZ
@@ -45,8 +45,12 @@ html
                       option(value='5') Five
                       option(value='6') Six
                       option(value='7') Seven
-                div
-                  input(type='checkbox', value='blah', name='hi')
+                div.checkbox-inline
+                  label.checkbox-inline Money-conscious
+                    input(type='checkbox', id='inlineCheckbox1', name='low-budget')
+                div.checkbox-inline
+                  label.checkbox-inline Hidden gems OK
+                    input(type='checkbox', id='inlineCheckbox2', name='hipster')
                 div
                   input.btn.btn-primary(type="submit", value="Submit")
                  
@@ -116,7 +120,7 @@ html
                       button.btn.btn-link(type='submit')
                         span.glyphicon.glyphicon-thumbs-down
 
-              if events
+              if morning
                 table.table.table-condensed.table-hover
                   tr
                     td= 'Name'
@@ -124,9 +128,34 @@ html
                     td= 'Address'
                     td= 'Opening'
                     td= 'Closing'
-                    each event in events
+                    each event in morning
                       tr
                         if event
                           each field in event
                             td= field
-
+              if afternoon
+                table.table.table-condensed.table-hover
+                  tr
+                    td= 'Name'
+                    td= 'Rating'
+                    td= 'Address'
+                    td= 'Opening'
+                    td= 'Closing'
+                    each event in afternoon
+                      tr
+                        if event
+                          each field in event
+                            td= field
+              if evening
+                table.table.table-condensed.table-hover
+                  tr
+                    td= 'Name'
+                    td= 'Rating'
+                    td= 'Address'
+                    td= 'Opening'
+                    td= 'Closing'
+                    each event in evening
+                      tr
+                        if event
+                          each field in event
+                            td= field
