@@ -1,7 +1,136 @@
 html
   head
+    meta(name="viewport" content="initial-scale=1.0, user-scalable=no")
+    meta(charset="utf-8")
+    style.
+      html, body, #map-canvas {height:100%;margin:0px;padding:0px;}
+      #panel {position: absolute;top: 5px;left: 50%;margin-left: -180px;z-index: 5;background-color: #fff;padding: 5px; border: 1px solid #999;}
     link(href='/css/itinerary.css' rel='stylesheet')
     link(href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css', rel='stylesheet')
+
+    script(src="https://maps.googleapis.com/maps/api/js")
+    script(type="text/javascript").
+      
+      var city_latlang = {'Las Vegas': new google.maps.LatLng(36.169941, -115.139830) , 'Phoenix':new google.maps.LatLng(33.448377, -112.074037) , 'Madison':new google.maps.LatLng(43.073052, -89.401230) , 'Urbana':new google.maps.LatLng(40.110588, -88.207270) , 'Champaign':new google.maps.LatLng(40.116420, -88.243383) , 'Charlotte':new google.maps.LatLng(35.227087, -80.843127) , 'Pittsburgh':new google.maps.LatLng(40.440625, -79.995886) }
+      var city =!{JSON.stringify(city)};
+      var breakfast_data =!{JSON.stringify(breakfast)};
+      var lunch_data =!{JSON.stringify(lunch)}; 
+      var dinner_data =!{JSON.stringify(dinner)};
+      var morning_data = !{JSON.stringify(morning)};
+      var afternoon_data = !{JSON.stringify(afternoon)};
+      var evening_data = !{JSON.stringify(evening)};
+      
+      
+      breakfast_latlng = new google.maps.LatLng(breakfast_data[5], breakfast_data[6]);
+      lunch_latlng = new google.maps.LatLng(lunch_data[5], lunch_data[6]); 
+      dinner_latlng = new google.maps.LatLng(dinner_data[5], dinner_data[6]); 
+
+      var directionsDisplay;
+      var directionsService = new google.maps.DirectionsService();
+      var map;
+      
+      function initialize() {
+        
+        directionsDisplay = new google.maps.DirectionsRenderer();
+        var dinnerIsLast = 0;
+        var mapOptions = {
+          zoom: 6,
+          center: city_latlang[city]
+        }
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        directionsDisplay.setMap(map);
+        
+        var start = breakfast_latlng;
+        if(evening_data.length > 0) {
+          var end = new google.maps.LatLng(evening_data[evening_data.length - 1][5], evening_data[evening_data.length - 1][6]);
+        }
+        else {
+          var end = dinner_latlng;
+          dinnerIsLast = 1;
+        }
+        
+        waypts = [];
+        
+
+        for(var i = 0; i < morning_data.length; i++) {
+          waypts.push({
+          location:new google.maps.LatLng(morning_data[i][5], morning_data[i][6]),
+          stopover:true});
+
+        }
+          waypts.push({
+          location:lunch_latlng,
+          stopover:true});
+
+        for(var i = 0; i < afternoon_data.length; i++) {
+          waypts.push({
+          location:new google.maps.LatLng(afternoon_data[i][5], afternoon_data[i][6]),
+          stopover:true});
+
+        }
+
+        if(!dinnerIsLast) {
+          waypts.push({
+          location:dinner_latlng,
+          stopover:true});
+        }
+
+        for(var i = 0; i < evening_data.length - 1; i++) {
+          waypts.push({
+          location:new google.maps.LatLng(evening_data[i][5], evening_data[i][6]),
+          stopover:true});
+
+        }
+        
+        
+        
+        var request = {
+          origin: start,
+          destination: end,
+          waypoints: waypts,
+          optimizeWaypoints: true,
+          travelMode: google.maps.TravelMode.DRIVING
+        };
+    
+        
+        directionsService.route(request, function(response, status) {
+          
+          if (status == google.maps.DirectionsStatus.OK) {
+            
+            directionsDisplay.setDirections(response);
+
+          }
+        }); 
+      } 
+      
+      function calcRoute() {
+        var start = breakfast_latlng;
+        var end = dinner_latlng;
+        waypts = [];
+          waypts.push({
+          location:lunch_latlng,
+          stopover:true});
+        
+        
+        
+        var request = {
+          origin: start,
+          destination: end,
+          waypoints: waypts,
+          optimizeWaypoints: true,
+          travelMode: google.maps.TravelMode.TRANSIT
+        };
+    
+
+        directionsService.route(request, function(response, status) {
+          if (status == google.maps.DirectionsStatus.OK) {
+            directionsDisplay.setDirections(response);
+
+          }
+        }); 
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+
   div(class="background-image")
   style body {background-image:url('https://newevolutiondesigns.com/images/freebies/city-wallpaper-18.jpg');
   body
@@ -20,6 +149,8 @@ html
     br
     div.container
       div.jumbotron
+        if city
+          div(id="map-canvas" style="float:left;width:35%;height:35%;")
         if save
           div.success-bar
             p Itinerary Saved
