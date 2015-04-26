@@ -102,33 +102,7 @@ html
           }
         }); 
       } 
-      
-      function calcRoute() {
-        var start = breakfast_latlng;
-        var end = dinner_latlng;
-        waypts = [];
-          waypts.push({
-          location:lunch_latlng,
-          stopover:true});
-        
-        
-        
-        var request = {
-          origin: start,
-          destination: end,
-          waypoints: waypts,
-          optimizeWaypoints: true,
-          travelMode: google.maps.TravelMode.TRANSIT
-        };
-    
 
-        directionsService.route(request, function(response, status) {
-          if (status == google.maps.DirectionsStatus.OK) {
-            directionsDisplay.setDirections(response);
-
-          }
-        }); 
-      }
       google.maps.event.addDomListener(window, 'load', initialize);
 
   div(class="background-image")
