@@ -23,7 +23,7 @@ exports.apify_set = function(set, api, city, callback) {
 
   var cb = function myself (url) {
     if (url) {
-      set[i][5] = url;
+      set[i][7] = url;
     }
     i++;
 

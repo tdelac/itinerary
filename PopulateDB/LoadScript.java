@@ -41,40 +41,38 @@ public class LoadScript {
 
 	public static void main(String[] args) throws JsonSyntaxException, IOException {
 
-	  curMax = Integer.parseInt(args[0]) + 500;
+	  //curMax = Integer.parseInt(args[0]) + 500;
 	  System.out.println(curMax);
 		
 		dbConnect = new ConnectionDriver();
 		
-		//dropTables();
+		doStuff();
 		//createTables();
-		fillTables();
+		//fillTables();
 
 	  dbConnect.close();	
 	}
 
-	public static void dropTables() {
+	public static void doStuff() {
 
         List<String> dropQueries = new ArrayList<String>();
+		    List<String> selectQueries = new ArrayList<String>();
 
         dropQueries.add(
             "DROP TABLE Itinerary_business");
         dropQueries.add(
             "DROP TABLE Itinerary");
-        dropQueries.add(
-            "DROP TABLE business_review");
-        dropQueries.add(
-            "DROP TABLE business_hours");
-        dropQueries.add(
-            "DROP TABLE Landmark");
-        dropQueries.add(
-            "DROP TABLE Restaurant");
-        dropQueries.add(
-            "DROP TABLE Business");
+        
+        selectQueries.add(
+            "SELECT * FROM itinerary");
 
-        System.out.print("Dropping tables...");
-        dbConnect.executeDrop(dropQueries);
-        System.out.println(" done.");
+ //       System.out.print("Dropping tables...");
+   //     dbConnect.executeDrop(dropQueries);
+     //   System.out.println(" done.");
+
+        System.out.println("Adding to tables...");
+        dbConnect.executeSelect(selectQueries);
+        System.out.println("done.");
     }
 
 	public static void createTables() {

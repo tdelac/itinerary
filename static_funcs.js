@@ -127,6 +127,61 @@ closest_unique_set = function(set, result_size, to_compare) {
   return result;
 }
 
+filter_xml = function(input) {
+  return input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+build_xml_event = function(event, open_tags, close_tags) {
+  var xml = "";
+
+  for(var i = 0; i < open_tags.length; ++i) {
+    var element = filter_xml(String(event[i]));
+    xml += (open_tags[i] + element + close_tags[i]);
+  }
+
+  return xml;
+}
+
+build_xml_events = function(events, open_tags, close_tags) {
+  var xml = ""
+
+  for (var i = 0; i < events.length; ++i) {
+    xml += "<event>";
+    xml += build_xml_event(events[i], open_tags, close_tags);
+    xml += "</event>";
+  }
+  
+  return xml
+}
+
+xml_of_itinerary = function(output) {
+  var open_tags = [ "<name>", "<stars>", "<address>", "<open>", "<close>" 
+                  , "<lat>", "<long>", "<url>" ];
+  var close_tags = [ "</name>", "</stars>", "</address>", "</open>", "</close>" 
+                   , "</lat>", "</long>", "</url>" ];
+
+  var breakfast = build_xml_event(output.breakfast, open_tags, close_tags),
+      lunch = build_xml_event(output.lunch, open_tags, close_tags),
+      dinner = build_xml_event(output.dinner, open_tags, close_tags),
+      morning = build_xml_events(output.morning, open_tags, close_tags),
+      afternoon= build_xml_events(output.afternoon, open_tags, close_tags),
+      evening = build_xml_events(output.evening, open_tags, close_tags);
+
+  return (
+      "<?xml version=\"1.0\"?>"
+    + "<itinerary>"
+      + "<date>" + (new Date()) + "</date>"
+      + "<city>" + output.city + "</city>"
+      + "<breakfast>" + breakfast + "</breakfast>"
+      + "<lunch>" + lunch + "</lunch>"
+      + "<dinner>" + dinner + "</dinner>"
+      + "<morning>" + morning + "</morning>"
+      + "<afternoon>" + afternoon + "</afternoon>"
+      + "<evening>" + evening + "</evening>" 
+    + "</itinerary>"
+  );
+}
+
 module.exports = {
   array_deep_copy: array_deep_copy,
   rand: rand, 
@@ -135,4 +190,5 @@ module.exports = {
   rand_unique_subset: rand_unique_subset,
   rand_unique_event: rand_unique_event,
   closest_unique_set: closest_unique_set,
+  xml_of_itinerary: xml_of_itinerary
 }

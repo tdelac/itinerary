@@ -105,7 +105,7 @@ module.exports = {
           + "review_ordered AS ( "
             + "SELECT * FROM weighted_stars "
             + "WHERE rownum <= " + rows + ") "
-            + "SELECT ro.name, ro.stars, ro.address, ro.open, ro.close " 
+            + "SELECT ro.name, ro.stars, ro.address, ro.open, ro.close, ro.latitude, ro.longitude " 
             + "FROM review_ordered ro "
             + "ORDER BY (ACOS(SIN(3.14*ro.latitude/180.0)*SIN(3.14*"+lat+"/180.0)+" 
               + "COS(3.14*ro.latitude/180.0)*COS(3.14*"+lat+"/180.0)*"
@@ -126,7 +126,7 @@ module.exports = {
           + "review_ordered AS ( "
             + "SELECT * FROM weighted_stars "
             + "WHERE rownum <= " + rows + ") "
-            + "SELECT ro.name, ro.stars, ro.address, ro.open, ro.close " 
+            + "SELECT ro.name, ro.stars, ro.address, ro.open, ro.close, ro.latitude, ro.longitude " 
             + "FROM review_ordered ro "
             + "ORDER BY (ACOS(SIN(3.14*ro.latitude/180.0)*SIN(3.14*"+lat+"/180.0)+" 
               + "COS(3.14*ro.latitude/180.0)*COS(3.14*"+lat+"/180.0)*"
@@ -148,7 +148,7 @@ module.exports = {
           + "review_ordered AS ( "
             + "SELECT * FROM weighted_stars "
             + "WHERE rownum <= " + rows + ") "
-            + "SELECT ro.name, ro.stars, ro.address, ro.open, ro.close " 
+            + "SELECT ro.name, ro.stars, ro.address, ro.open, ro.close, ro.latitude, ro.longitude " 
             + "FROM review_ordered ro "
             + "ORDER BY (ACOS(SIN(3.14*ro.latitude/180.0)*SIN(3.14*"+lat+"/180.0)+" 
               + "COS(3.14*ro.latitude/180.0)*COS(3.14*"+lat+"/180.0)*"
@@ -207,5 +207,21 @@ module.exports = {
             + "ORDER BY (b.review_count * b.stars) desc) "
             + "SELECT * FROM weighted_stars "
             + "WHERE rownum <= " + rows);
+  },
+
+  insert_new_itinerary: function(user_id, itinerary_xml) {
+    var out = ( "INSERT INTO itinerary "
+            + "VALUES( "
+              + "'" + user_id + "'" + ", "
+              + "itinerary_sequence.nextval, "
+              + "SYS.XMLType.CreateXML('" + itinerary_xml + "'))");
+    console.log(out);
+    return out;
+  },
+
+  get_itineraries_given_user: function(user_id) {
+    return ("SELECT SYS.XMLType.getStringVal(itinerary_data) "
+            + "FROM itinerary "
+            + "WHERE user_id = " + user_id);
   }
 }

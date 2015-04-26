@@ -26,6 +26,9 @@ html
                 small   courtesy of facebook
             p ID: #{user.id}
             p Name: #{user.displayName}
+            h2 Itinerary info
+              each itinerary in data
+                p= itinerary
             br
             h3 Your friends who use itinerary:
             div

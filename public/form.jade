@@ -20,6 +20,9 @@ html
     br
     div.container
       div.jumbotron
+        if save
+          div.success-bar
+            p Itinerary Saved
         h1.text-center Itinerary App
         div.text-center
           div
@@ -96,7 +99,7 @@ html
                         each field, j in event
                           if j==0
                             td
-                              a.smooth-link(href= event[5] target="_blank") 
+                              a.smooth-link(href= event[7] target="_blank") 
                                 label.smooth-link.inline-glyph= field
                           else
                             if j==4
@@ -148,7 +151,7 @@ html
                         each field, j in event
                           if j==0
                             td
-                              a.smooth-link(href= event[5] target="_blank")
+                              a.smooth-link(href= event[7] target="_blank")
                                 lable.smooth-link.inline-glyph= field
                           else
                             if j==4
@@ -200,7 +203,7 @@ html
                         each field, j in event
                           if j==0
                             td
-                              a.smooth-link(href= event[5] target="_blank")
+                              a.smooth-link(href= event[7] target="_blank")
                                 label.smooth-link.inline-glyph= field
                           else 
                             if j==4
@@ -214,3 +217,6 @@ html
                             else 
                               if j < 4
                                 td= field
+          form(action='/', method='post')
+            input(type='hidden', value='true', name='save_itinerary')
+            button.btn.btn-primary(type='submit') Save Itinerary

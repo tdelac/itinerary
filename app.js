@@ -141,7 +141,7 @@ app.post('/', ensureAuthenticated, function(req, res) {
 });
 
 app.get('/account', ensureAuthenticated, function(req, res){
-  res.render('account', { user: req.user, friends: glbl_dict.friends });
+  process_account_get(req, res);
 });
 
 app.get('/login', function(req, res){
@@ -207,6 +207,17 @@ var process_cityform_post = function(req, res) {
   var breakfast = glbl_dict.output.breakfast,
       lunch = glbl_dict.output.lunch,
       dinner = glbl_dict.output.dinner;
+
+  /* User opts to save itinerary */
+  if (req.body.hasOwnProperty('save_itinerary')) {
+    var itinerary_xml = static.xml_of_itinerary(glbl_dict.output);
+
+    var sql = 
+      queries.insert_new_itinerary(req.user.id, itinerary_xml);
+
+    db(sql, res, render_form_after_save);
+    return;
+  }
 
   /* User requests different breakfast option */
   if (req.body.hasOwnProperty('new_breakfast')) {
@@ -286,7 +297,7 @@ var process_cityform_post = function(req, res) {
 
     yelp.get_url(yelp_api_instance, new_event[0], glbl_dict.city, function(url) {
       if (url) {
-        new_event[5] = url; // Associate url with this breakfast place
+        new_event[7] = url; // Associate url with this breakfast place
         glbl_dict.output.morning[index] = new_event;
       }
 
@@ -303,7 +314,7 @@ var process_cityform_post = function(req, res) {
 
     yelp.get_url(yelp_api_instance, new_event[0], glbl_dict.city, function(url) {
       if (url) {
-        new_event[5] = url; // Associate url with this breakfast place
+        new_event[7] = url; // Associate url with this breakfast place
         glbl_dict.output.afternoon[index] = new_event;
       }
 
@@ -320,7 +331,7 @@ var process_cityform_post = function(req, res) {
 
     yelp.get_url(yelp_api_instance, new_event[0], glbl_dict.city, function(url) {
       if (url) {
-        new_event[5] = url; // Associate url with this breakfast place
+        new_event[7] = url; // Associate url with this breakfast place
         glbl_dict.output.evening[index] = new_event;
       }
 
@@ -348,6 +359,17 @@ var process_cityform_post = function(req, res) {
 
     db(sql, res, process_breakfast);
   }
+}
+
+/* Retrieve info necessary to display the account page */
+process_account_get = function(req, res) {
+  glbl_dict.user = req.user;
+  
+  var sql = 
+    queries.get_itineraries_given_user(req.user.id);
+
+  console.log(sql);
+  db(sql, res, render_account);
 }
 
 
@@ -532,4 +554,18 @@ var render_cityform = function(res) {
 /* Display the form with output */
 var render_form_itinerary = function(res) {
   res.render('form', glbl_dict.output);
+}
+
+/* Display the form with confirmation of save */
+var render_form_after_save = function(res, db_out) {
+  res.render('form', {save: "success"});
+}
+
+/* Display account page */
+var render_account = function(res, db_out) {
+  var itineraries = db_out.rows;
+
+  console.log(itineraries);
+  res.render('account', {user: glbl_dict.user, friends: glbl_dict.friends,
+    data: itineraries});
 }

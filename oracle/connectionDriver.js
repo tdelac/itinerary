@@ -61,19 +61,26 @@ var db_connect = function (creds, sql, res, func) {
               console.error(err.message);
               return;
             }
-            func(res, result); // Here's that function the app needs performed!
-
-            /* Close the connection! */
-            connection.release(
-            function(err) 
-            {
-              if (err) {
-                console.error(err.message);
-                return;
-              }
+            /* Commit transaction */
+            connection.commit(
+              function(err) {
+                if (err) {
+                  console.error(err.message);
+                  return;
+                }
+                /* Close connection*/
+                connection.release(
+                  function (err) {
+                    if (err) {
+                      console.error(err.message);
+                      return;
+                    }
+                    func(res, result); // Here's that function the app needs performed!
+                  }
+               );
             });
           });
-        });
+     });
 }
 
 /* For testing */

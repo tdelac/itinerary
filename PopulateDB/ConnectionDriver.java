@@ -1,6 +1,7 @@
 import java.sql.*;
 import java.io.*;
 import java.util.Collection;
+import oracle.xdb.*;
 
 
 /*
@@ -131,9 +132,43 @@ public class ConnectionDriver {
                 stmt.close();
                 conn.close();
             } catch (SQLException e1) {
-                e.printStackTrace();
+                e1.printStackTrace();
             }
         }
+    }
+
+    public void executeSelect(String sql) {
+      Statement stmt = null;
+      ResultSet rs;
+      try {
+        stmt = conn.createStatement();
+        rs = stmt.executeQuery(sql);
+
+        while (rs.next()) {
+          String uid = rs.getString("user_id");
+          int iid = rs.getInt("itinerary_id");
+          XMLType xml = (XMLType) rs.getObject("itinerary_data");
+          System.out.println(uid);
+          System.out.println(iid);
+          System.out.println(xml);
+        }
+        rs.close();
+        stmt.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+        try {
+          stmt.close();
+          conn.close();
+        } catch (SQLException e1) {
+          e1.printStackTrace();
+        }
+      }
+    }
+
+    public void executeSelect(Collection<String> sqlSet) {
+      for (String sql : sqlSet) {
+        executeSelect(sql);
+      }
     }
 
     public void executeInsert(Collection<String> sqlSet) {
