@@ -74,9 +74,10 @@ html
                     each field, i in breakfast
                       if i==0
                         td
-                          div.control-group
-                            span.glyphicon.glyphicon-cutlery
-                            label.inline-glyph= field
+                          a.smooth-link(href= breakfast[7] target="_blank")
+                            div.control-group
+                              span.glyphicon.glyphicon-cutlery
+                              label.smooth-link.inline-glyph= field
                       else 
                         if i==4
                           td
@@ -93,16 +94,22 @@ html
                     tr
                       if event
                         each field, j in event
-                          if j==4
+                          if j==0
                             td
-                              div.control-group
-                                form.slim-row(action='/#morning', method='post')
-                                  label.inline-glyph= field
-                                  input(type='hidden', value= i, name='new_morning')
-                                  button.btn.btn-link(type='submit')
-                                    span.glyphicon.glyphicon-thumbs-down
-                          else 
-                            td= field
+                              a.smooth-link(href= event[5] target="_blank") 
+                                label.smooth-link.inline-glyph= field
+                          else
+                            if j==4
+                              td
+                                div.control-group
+                                  form.slim-row(action='/#morning', method='post')
+                                    label.inline-glyph= field
+                                    input(type='hidden', value= i, name='new_morning')
+                                    button.btn.btn-link(type='submit')
+                                      span.glyphicon.glyphicon-thumbs-down
+                            else 
+                              if j < 4
+                                td= field
 
               if afternoon
                 a(name='afternoon')
@@ -119,9 +126,10 @@ html
                     each field, i in lunch
                       if i==0
                         td
-                          div.control-group
-                            span.glyphicon.glyphicon-cutlery
-                            label.inline-glyph= field
+                          a.smooth-link(href= lunch[7] target="_blank")
+                            div.control-group
+                              span.glyphicon.glyphicon-cutlery
+                              label.smooth-link.inline-glyph= field
                       else 
                         if i==4
                           td
@@ -138,16 +146,22 @@ html
                     tr
                       if event
                         each field, j in event
-                          if j==4
+                          if j==0
                             td
-                              div.control-group
-                                form.slim-row(action='/#afternoon', method='post')
-                                  label.inline-glyph= field
-                                  input(type='hidden', value= i, name='new_afternoon')
-                                  button.btn.btn-link(type='submit')
-                                    span.glyphicon.glyphicon-thumbs-down
-                          else 
-                            td= field
+                              a.smooth-link(href= event[5] target="_blank")
+                                lable.smooth-link.inline-glyph= field
+                          else
+                            if j==4
+                              td
+                                div.control-group
+                                  form.slim-row(action='/#afternoon', method='post')
+                                    label.inline-glyph= field
+                                    input(type='hidden', value= i, name='new_afternoon')
+                                    button.btn.btn-link(type='submit')
+                                      span.glyphicon.glyphicon-thumbs-down
+                            else 
+                              if j < 4
+                                td= field
 
               if evening
                 a(name='evening')
@@ -164,9 +178,10 @@ html
                     each field, i in dinner
                       if i==0
                         td
-                          div.control-group
-                            span.glyphicon.glyphicon-cutlery
-                            label.inline-glyph= field
+                          a.smooth-link(href= dinner[7] target="_blank")
+                            div.control-group
+                              span.glyphicon.glyphicon-cutlery
+                              label.smooth-link.inline-glyph= field
                       else 
                         if i==4
                           td
@@ -183,13 +198,19 @@ html
                     tr
                       if event
                         each field, j in event
-                          if j==4
+                          if j==0
                             td
-                              div.control-group
-                                form.slim-row(action='/#evening', method='post')
-                                  label.inline-glyph= field
-                                  input(type='hidden', value= i, name='new_evening')
-                                  button.btn.btn-link(type='submit')
-                                    span.glyphicon.glyphicon-thumbs-down
+                              a.smooth-link(href= event[5] target="_blank")
+                                label.smooth-link.inline-glyph= field
                           else 
-                            td= field
+                            if j==4
+                              td
+                                div.control-group
+                                  form.slim-row(action='/#evening', method='post')
+                                    label.inline-glyph= field
+                                    input(type='hidden', value= i, name='new_evening')
+                                    button.btn.btn-link(type='submit')
+                                      span.glyphicon.glyphicon-thumbs-down
+                            else 
+                              if j < 4
+                                td= field

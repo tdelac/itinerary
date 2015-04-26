@@ -6,19 +6,30 @@ var express = require('express')
 , session = require('express-session')
 , cookieParser = require("cookie-parser")
 , methodOverride = require('method-override')
-, secrets = require('./secrets');
-var path       = require('path');
-var bodyparser = require('body-parser');
-var db         = require('./oracle/connectionDriver.js');
-var queries    = require('./oracle/queries.js');
-var static     = require('./static_funcs.js');
-var facebook = require('./facebook');
-/* Constants */
-var FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID();
-var FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET();
-var RAND_BUFFER = 20;
-var RAND_RESTAURANT = RAND_BUFFER;
-var WEEKDAY = new Array(7);
+, secrets = require('./secrets')
+, path       = require('path')
+, bodyparser = require('body-parser')
+, db         = require('./oracle/connectionDriver.js')
+, queries    = require('./oracle/queries.js')
+, static     = require('./static_funcs.js')
+, facebook = require('./facebook')
+, yelp = require('./yelp');
+
+
+//--------------------------------------------------------------
+// GLOBAL CONSTANTS
+// -------------------------------------------------------------
+
+var FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID()
+, FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET()
+, YELP_CONSUMER = secrets.YELP_CONSUMER()
+, YELP_CONSUMER_SECRET = secrets.YELP_CONSUMER_SECRET()
+, YELP_TOKEN = secrets.YELP_TOKEN()
+, YELP_TOKEN_SECRET = secrets.YELP_TOKEN_SECRET()
+, RAND_BUFFER = 20
+, RAND_RESTAURANT = RAND_BUFFER
+, WEEKDAY = new Array(7);
+
 WEEKDAY[0] = "\'Su\'";
 WEEKDAY[1] = "\'M\'";
 WEEKDAY[2] = "\'Tu\'";
@@ -27,9 +38,18 @@ WEEKDAY[4] = "\'Th\'";
 WEEKDAY[5] = "\'F\'";
 WEEKDAY[6] = "\'Sa\'";
 
-/* Dynamic */
+
+//--------------------------------------------------------------
+// GLOBAL DYNAMIC DATA
+// -------------------------------------------------------------
+
 var glbl_dict = {properties: {}, output: {}} // Global state of itinerary data
 
+//--------------------------------------------------------------
+// FACEBOOK API
+// -------------------------------------------------------------
+
+/* Dynamic */
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
 //   serialize users into and deserialize users out of the session.  Typically,
@@ -75,23 +95,40 @@ passport.use(new FacebookStrategy({
   }
 ));
 
+//--------------------------------------------------------------
+// YELP API
+// -------------------------------------------------------------
+
+var yelp_api_instance = require("yelp").createClient({
+  consumer_key: YELP_CONSUMER,
+  consumer_secret: YELP_CONSUMER_SECRET,
+  token: YELP_TOKEN,
+  token_secret: YELP_TOKEN_SECRET
+});
+
+//--------------------------------------------------------------
+// APP SETUP
+// -------------------------------------------------------------
 
 var app = express();
 
-// configure Express
-  app.set('views', path.join(__dirname, 'public'));
-  app.set('view engine', 'jade');
-  app.use(logger());
-  app.use(cookieParser());
-  app.use(bodyparser.urlencoded({extended: false}));
-  app.use(methodOverride());
-  app.use(session({ secret: 'keyboard cat' }));
-  // Initialize Passport!  Also use passport.session() middleware, to support
-  // persistent login sessions (recommended).
-  app.use(passport.initialize());
-  app.use(passport.session());
-  app.use(express.static(__dirname + '/public'));
+app.set('views', path.join(__dirname, 'public'));
+app.set('view engine', 'jade');
+app.use(logger());
+app.use(cookieParser());
+app.use(bodyparser.urlencoded({extended: false}));
+app.use(methodOverride());
+app.use(session({ secret: 'keyboard cat' }));
+// Initialize Passport!  Also use passport.session() middleware, to support
+// persistent login sessions (recommended).
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(express.static(__dirname + '/public'));
 
+
+//--------------------------------------------------------------
+// ROUTES
+// -------------------------------------------------------------
 
 /* If direct to 'home' page */
 app.get('/', ensureAuthenticated, function(req, res) {
@@ -121,7 +158,7 @@ app.get('/auth/facebook',
   function(req, res){
     // The request will be redirected to Facebook for authentication, so this
     // function will not be called.
-  });
+});
 
 // GET /auth/facebook/callback
 //   Use passport.authenticate() as route middleware to authenticate the
@@ -132,7 +169,7 @@ app.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   function(req, res) {
     res.redirect('/');
-  });
+});
 
 app.get('/logout', function(req, res){
   req.logout();
@@ -153,7 +190,6 @@ function ensureAuthenticated(req, res, next) {
 }
 
 
-
 //-------------------------------------------------------------
 // Process Incoming Request Functions
 // ------------------------------------------------------------
@@ -162,6 +198,7 @@ var process_cityform = function(req, res) {
   render_cityform(res);
 }
 
+/* Basically where all the non-database action is */
 var process_cityform_post = function(req, res) {
   // Set date
   glbl_dict.day = WEEKDAY[(new Date()).getDay()];
@@ -182,24 +219,39 @@ var process_cityform_post = function(req, res) {
       new_breakfast = glbl_dict.breakfast[static.rand(RAND_RESTAURANT)];      
     }
 
-    glbl_dict.output.breakfast = new_breakfast; // Update global
-    render_form_itinerary(res);
+    // Add url info to eatery. Should really get abstracted away */
+    yelp.get_url(yelp_api_instance, new_breakfast[0], glbl_dict.city, function(url) {
+      if (url) {
+        new_breakfast[7] = url; // Associate url with this breakfast place
+        glbl_dict.output.breakfast = new_breakfast;
+      }
+
+      render_form_itinerary(res);
+    });
     return;
   }
 
   /* User requests different lunch option */
   if (req.body.hasOwnProperty('new_lunch')) {
     var new_lunch = glbl_dict.lunch[static.rand(RAND_RESTAURANT)];
+    console.log("whyyyy");
 
     // Generate a new, unique breakfast option
+    // Possible weak point for inf loop
     while (new_lunch[0] === lunch[0] || 
            new_lunch[0] === dinner[0] || 
            new_lunch[0] === breakfast[0]) {
       new_lunch = glbl_dict.lunch[static.rand(RAND_RESTAURANT)];      
     }
 
-    glbl_dict.output.lunch = new_lunch; // Update global
-    render_form_itinerary(res);
+    yelp.get_url(yelp_api_instance, new_lunch[0], glbl_dict.city, function(url) {
+      if (url) {
+        new_lunch[7] = url; // Associate url with this breakfast place
+        glbl_dict.output.lunch = new_lunch; 
+      }
+
+      render_form_itinerary(res);
+    });
     return;
   }
 
@@ -214,8 +266,14 @@ var process_cityform_post = function(req, res) {
       new_dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];      
     }
 
-    glbl_dict.output.dinner = new_dinner; // Update global
-    render_form_itinerary(res);
+    yelp.get_url(yelp_api_instance, new_dinner[0], glbl_dict.city, function(url) {
+      if (url) {
+        new_dinner[7] = url; // Associate url with this breakfast place
+        glbl_dict.output.dinner = new_dinner; 
+      }
+
+      render_form_itinerary(res);
+    });
     return;
   }
 
@@ -226,8 +284,14 @@ var process_cityform_post = function(req, res) {
 
     var new_event = static.rand_unique_event(all_morning, glbl_dict.output);
 
-    glbl_dict.output.morning[index] = new_event;
-    render_form_itinerary(res);
+    yelp.get_url(yelp_api_instance, new_event[0], glbl_dict.city, function(url) {
+      if (url) {
+        new_event[5] = url; // Associate url with this breakfast place
+        glbl_dict.output.morning[index] = new_event;
+      }
+
+      render_form_itinerary(res);
+    });
     return;
   } 
 
@@ -237,8 +301,14 @@ var process_cityform_post = function(req, res) {
 
     var new_event = static.rand_unique_event(all_afternoon, glbl_dict.output);
 
-    glbl_dict.output.afternoon[index] = new_event;
-    render_form_itinerary(res);
+    yelp.get_url(yelp_api_instance, new_event[0], glbl_dict.city, function(url) {
+      if (url) {
+        new_event[5] = url; // Associate url with this breakfast place
+        glbl_dict.output.afternoon[index] = new_event;
+      }
+
+      render_form_itinerary(res);
+    });
     return;
   } 
 
@@ -248,8 +318,14 @@ var process_cityform_post = function(req, res) {
 
     var new_event = static.rand_unique_event(all_evening, glbl_dict.output);
 
-    glbl_dict.output.evening[index] = new_event;
-    render_form_itinerary(res);
+    yelp.get_url(yelp_api_instance, new_event[0], glbl_dict.city, function(url) {
+      if (url) {
+        new_event[5] = url; // Associate url with this breakfast place
+        glbl_dict.output.evening[index] = new_event;
+      }
+
+      render_form_itinerary(res);
+    });
     return;
   } 
 
@@ -292,14 +368,21 @@ var process_breakfast = function(res, db_out) {
   glbl_dict.breakfast = db_out.rows;
   
   /* Pre-determine breakfast for morning query info */
-  glbl_dict.output.breakfast 
-    = glbl_dict.breakfast[static.rand(RAND_RESTAURANT)]; 
+  var breakfast = glbl_dict.breakfast[static.rand(RAND_RESTAURANT)]; 
+  glbl_dict.output.breakfast = breakfast; 
 
-  var sql = 
-    queries.get_lunch_by_stars_weighted
-      ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT);
+  /* Use yelp api to retrieve additional business info */
+  yelp.get_url(yelp_api_instance, breakfast[0], glbl_dict.city, function(url) {
+    if (url) {
+      glbl_dict.output.breakfast[7] = url; // Associate url with this breakfast place
+    }
 
-  db(sql, res, process_lunch);
+    var sql = 
+      queries.get_lunch_by_stars_weighted
+        ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT);
+
+    db(sql, res, process_lunch);
+  });
 }
 
 /* Process lunch search query */
@@ -314,12 +397,19 @@ var process_lunch = function(res, db_out) {
     lunch = glbl_dict.lunch[static.rand(RAND_RESTAURANT)];
   }
   glbl_dict.output.lunch = lunch;
+  
+  /* Use yelp api to retrieve additional business info */
+  yelp.get_url(yelp_api_instance, lunch[0], glbl_dict.city, function(url) {
+    if (url) {
+      glbl_dict.output.lunch[7] = url; // Associate url with this breakfast place
+    }
 
-  var sql = 
-    queries.get_dinner_by_stars_weighted
-      ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT);
+    var sql = 
+      queries.get_dinner_by_stars_weighted
+        ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT);
 
-  db(sql, res, process_dinner);
+    db(sql, res, process_dinner);
+  });
 }
 
 /* Process dinner search query */
@@ -333,20 +423,26 @@ var process_dinner = function(res, db_out) {
   while (dinner[0] === lunch[0] || dinner[0] === breakfast[0]) {
     dinner = glbl_dict.dinner[static.rand(RAND_RESTAURANT)];
   }
-
   glbl_dict.output.dinner = dinner;
 
-  // Anchor these events to lunch
-  var sql = 
-    queries.get_morning_landmark_by_stars_dist_weighted(
-        "'" + glbl_dict.city + "'" 
-      , glbl_dict.day 
-      , glbl_dict.num_morning * RAND_BUFFER
-      , glbl_dict.output.lunch[5] // lat
-      , glbl_dict.output.lunch[6] // long
-    );
+  /* Use yelp api to retrieve additional business info */
+  yelp.get_url(yelp_api_instance, dinner[0], glbl_dict.city, function(url) {
+    if (url) {
+      glbl_dict.output.dinner[7] = url; // Associate url with this breakfast place
+    }
 
-  db(sql, res, process_morning_landmarks);
+    // Anchor these events to lunch
+    var sql = 
+      queries.get_morning_landmark_by_stars_dist_weighted(
+          "'" + glbl_dict.city + "'" 
+        , glbl_dict.day 
+        , glbl_dict.num_morning * RAND_BUFFER
+        , glbl_dict.output.lunch[5] // lat
+        , glbl_dict.output.lunch[6] // long
+      );
+
+    db(sql, res, process_morning_landmarks);
+  });
 }
 
 /* Process morning landmark query search */
@@ -400,20 +496,27 @@ var make_new_itinerary = function(res, db_out) {
 
   /* Retrieve all landmark activities */
   var morning = 
-    static.closest_unique_set(all_morning, glbl_dict.num_morning, []);
+    static.closest_unique_set(all_morning, glbl_dict.num_morning, [], yelp);
   var afternoon = 
-    static.closest_unique_set(all_afternoon, glbl_dict.num_afternoon, morning);
+    static.closest_unique_set(all_afternoon, glbl_dict.num_afternoon, morning, yelp);
   var evening = 
-    static.closest_unique_set(all_evening, glbl_dict.num_evening, morning.concat(afternoon));
+    static.closest_unique_set(all_evening, glbl_dict.num_evening, morning.concat(afternoon), yelp);
 
-  /* Build add output to be rendered to global state */
-  glbl_dict.output.city = city;
-  glbl_dict.output.morning = morning;
-  glbl_dict.output.afternoon = afternoon;
-  glbl_dict.output.evening = evening;
+  /* Add all extra yelp data to event sets */
+  yelp.apify_set(morning, yelp_api_instance, city, function() {
+    yelp.apify_set(afternoon, yelp_api_instance, city, function() {
+      yelp.apify_set(evening, yelp_api_instance, city, function() {
+        /* Build add output to be rendered to global state */
+        glbl_dict.output.city = city;
+        glbl_dict.output.morning = morning;
+        glbl_dict.output.afternoon = afternoon;
+        glbl_dict.output.evening = evening;
 
-  /* Render */
-  render_form_itinerary(res);
+        /* Render */
+        render_form_itinerary(res);
+      });
+    });
+  });
 }
 
 

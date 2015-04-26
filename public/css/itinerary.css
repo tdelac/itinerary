@@ -25,3 +25,8 @@
   margin-bottom: 0em;
   padding-bottom: 0em;
 }
+
+.smooth-link {
+  color: inherit;
+  cursor: pointer;
+}

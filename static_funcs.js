@@ -3,6 +3,8 @@
  * Description: Misc functions to help with development. 
  */
 
+var yelp = require("./yelp");
+
 array_deep_copy = function(input) {
   var output = [];
 
@@ -132,5 +134,5 @@ module.exports = {
   format_time: format_time,
   rand_unique_subset: rand_unique_subset,
   rand_unique_event: rand_unique_event,
-  closest_unique_set: closest_unique_set
+  closest_unique_set: closest_unique_set,
 }
