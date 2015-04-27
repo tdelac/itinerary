@@ -13,7 +13,8 @@ var express = require('express')
 , queries    = require('./oracle/queries.js')
 , static     = require('./static_funcs.js')
 , facebook = require('./facebook')
-, yelp = require('./yelp');
+, yelp = require('./yelp')
+, xml2js = require('xml2js');
 
 
 //--------------------------------------------------------------
@@ -200,8 +201,11 @@ var process_cityform = function(req, res) {
 
 /* Basically where all the non-database action is */
 var process_cityform_post = function(req, res) {
+  var date = new Date(),
+      formatted_date = date.getFullYear() + "/" + 
+        (date.getMonth() + 1) + "/" + date.getDate();
   // Set date
-  glbl_dict.day = WEEKDAY[(new Date()).getDay()];
+  glbl_dict.day = WEEKDAY[date.getDay()];
 
   // Retrieve what is currently outputted
   var breakfast = glbl_dict.output.breakfast,
@@ -213,7 +217,10 @@ var process_cityform_post = function(req, res) {
     var itinerary_xml = static.xml_of_itinerary(glbl_dict.output);
 
     var sql = 
-      queries.insert_new_itinerary(req.user.id, itinerary_xml);
+      queries.insert_new_itinerary(req.user.id, 
+          glbl_dict.output.city, formatted_date, itinerary_xml);
+
+    console.log(sql);
 
     db(sql, res, render_form_after_save);
     return;
@@ -368,7 +375,6 @@ process_account_get = function(req, res) {
   var sql = 
     queries.get_itineraries_given_user(req.user.id);
 
-  console.log(sql);
   db(sql, res, render_account);
 }
 
@@ -532,6 +538,7 @@ var make_new_itinerary = function(res, db_out) {
         glbl_dict.output.city = city;
         glbl_dict.output.morning = morning;
         glbl_dict.output.afternoon = afternoon;
+        console.log(glbl_dict.output.afternoon);
         glbl_dict.output.evening = evening;
 
         /* Render */
@@ -565,7 +572,51 @@ var render_form_after_save = function(res, db_out) {
 var render_account = function(res, db_out) {
   var itineraries = db_out.rows;
 
-  console.log(itineraries);
-  res.render('account', {user: glbl_dict.user, friends: glbl_dict.friends,
-    data: itineraries});
+  for (var i = 0; i < itineraries.length; ++i) {
+    itineraries[i][2] = static.pretty_date(itineraries[i][2]);
+  }
+
+  var output = {
+    user: glbl_dict.user,
+    friends: glbl_dict.friends,
+    itineraries: itineraries
+  }
+
+  res.render('account', output);
+  /*
+  var xml = db_out.rows,
+      joined = "<root>" + xml.join("") + "</root>";
+      xml_parser = new xml2js.Parser();
+*/
+      /*
+  xml_parser.parseString(joined, function(err, result) {
+    if (err) {
+      console.log(err.message);
+      return;
+    }
+
+    if (result) {
+      var itineraries = result.root.itinerary;
+      var output = {
+        user: glbl_dict.user,
+        friends: glbl_dict.friends,
+        itineraries: []
+      };
+      for (var i = 0; i < list.length; ++i) {
+        var input = itineraries[i],
+            date = Date.parse(input.date),
+            formatted_date = date.getMonth() + 1 + "/" + 
+              date.getDate() + "/" + date.getYear();
+
+        output.itineraries[i] = 
+        {
+          date: formatted_date,
+          city: input.city,
+          
+        };
+      }
+    }
+
+    res.render('account', output); 
+  });*/
 }

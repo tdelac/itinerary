@@ -209,17 +209,24 @@ module.exports = {
             + "WHERE rownum <= " + rows);
   },
 
-  insert_new_itinerary: function(user_id, itinerary_xml) {
+  insert_new_itinerary: function(user_id, city, date, itinerary_xml) {
     var out = ( "INSERT INTO itinerary "
             + "VALUES( "
               + "'" + user_id + "'" + ", "
               + "itinerary_sequence.nextval, "
+              + "'" + city + "', "
+              + "TO_DATE(" + "'" + date + "', 'yyyy/mm/dd'), "
               + "SYS.XMLType.CreateXML('" + itinerary_xml + "'))");
-    console.log(out);
     return out;
   },
 
   get_itineraries_given_user: function(user_id) {
+    return ("SELECT itinerary_id, city, itinerary_date "
+            + "FROM itinerary "
+            + "WHERE user_id = " + user_id);
+  },
+
+  get_itinerary: function(user_id, itinerary_id) {
     return ("SELECT SYS.XMLType.getStringVal(itinerary_data) "
             + "FROM itinerary "
             + "WHERE user_id = " + user_id);

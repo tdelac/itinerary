@@ -168,10 +168,7 @@ xml_of_itinerary = function(output) {
       evening = build_xml_events(output.evening, open_tags, close_tags);
 
   return (
-      "<?xml version=\"1.0\"?>"
-    + "<itinerary>"
-      + "<date>" + (new Date()) + "</date>"
-      + "<city>" + output.city + "</city>"
+    "<itinerary>"
       + "<breakfast>" + breakfast + "</breakfast>"
       + "<lunch>" + lunch + "</lunch>"
       + "<dinner>" + dinner + "</dinner>"
@@ -182,6 +179,15 @@ xml_of_itinerary = function(output) {
   );
 }
 
+pretty_date = function(date) {
+  var d = date.getDate();
+  var monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", 
+      "Aug", "Sep", "Oct", "Nov", "Dec" ];
+  var m = monthNames[date.getMonth()];
+  var y = date.getFullYear();
+  return d+' '+m+' '+y;
+}
+
 module.exports = {
   array_deep_copy: array_deep_copy,
   rand: rand, 
@@ -190,5 +196,6 @@ module.exports = {
   rand_unique_subset: rand_unique_subset,
   rand_unique_event: rand_unique_event,
   closest_unique_set: closest_unique_set,
-  xml_of_itinerary: xml_of_itinerary
+  xml_of_itinerary: xml_of_itinerary,
+  pretty_date: pretty_date
 }

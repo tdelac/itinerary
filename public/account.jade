@@ -26,11 +26,20 @@ html
                 small   courtesy of facebook
             p ID: #{user.id}
             p Name: #{user.displayName}
-            h2 Itinerary info
-              each itinerary in data
-                p= itinerary
+            div
+              block content
+                p Your Past Itineraries
+                if itineraries
+                  table.table.table-condensed.table-hover
+                    tr
+                      td= 'Date'
+                      td= 'City'
+                    each itinerary in itineraries
+                      tr
+                        td= itinerary[2]
+                        td= itinerary[1]
             br
-            h3 Your friends who use itinerary:
+            p Your friends who use itinerary:
             div
               table.table.table-striped
                 thead
