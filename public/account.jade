@@ -28,7 +28,7 @@ html
             p Name: #{user.displayName}
             div
               block content
-                p Your Past Itineraries
+                h2 Your Past Itineraries
                 if itineraries
                   table.table.table-condensed.table-hover
                     tr
@@ -39,7 +39,7 @@ html
                         td= itinerary[2]
                         td= itinerary[1]
             br
-            p Your friends who use itinerary:
+            h2 Your friends who use itinerary:
             div
               table.table.table-striped
                 thead
