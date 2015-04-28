@@ -223,12 +223,13 @@ module.exports = {
   get_itineraries_given_user: function(user_id) {
     return ("SELECT itinerary_id, city, itinerary_date "
             + "FROM itinerary "
-            + "WHERE user_id = " + user_id);
+            + "WHERE user_id = " + user_id 
+            + " ORDER BY itinerary_date DESC");
   },
 
   get_itinerary: function(user_id, itinerary_id) {
     return ("SELECT SYS.XMLType.getStringVal(itinerary_data) "
             + "FROM itinerary "
-            + "WHERE user_id = " + user_id);
+            + "WHERE user_id = " + user_id + " AND itinerary_id = " + itinerary_id);
   }
 }

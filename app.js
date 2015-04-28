@@ -141,8 +141,16 @@ app.post('/', ensureAuthenticated, function(req, res) {
   process_cityform_post(req, res);
 });
 
+app.get('/itinerary', function(req, res) {
+  res.redirect('/');
+});
+
+app.post('/itinerary', ensureAuthenticated, function(req, res) {
+  process_itinerary_display(req, res);
+});
+
 app.get('/account', ensureAuthenticated, function(req, res){
-  process_account_get(req, res);
+  process_account_get(req, res)
 });
 
 app.get('/login', function(req, res){
@@ -197,6 +205,21 @@ function ensureAuthenticated(req, res, next) {
 
 var process_cityform = function(req, res) {
   render_cityform(res);
+}
+
+/* Display an (uneditable) itinerary */
+var process_itinerary_display = function(req, res) {
+  var user_id = req.body.user_id,
+      itinerary_id = req.body.itinerary_id;
+
+  console.log(itinerary_id);
+
+  var sql = 
+    queries.get_itinerary(user_id, itinerary_id);
+
+  console.log(sql);
+
+  db(sql, res, render_itinerary_display);
 }
 
 /* Basically where all the non-database action is */
@@ -619,4 +642,45 @@ var render_account = function(res, db_out) {
 
     res.render('account', output); 
   });*/
+}
+
+var render_itinerary_display = function(res, db_out) {
+  var xml = db_out.rows,
+      xml_parser = new xml2js.Parser();
+
+  xml_parser.parseString(xml, function(err, result) {
+    if (err) {
+      console.log(err.message);
+      return;
+    }
+
+    if (result) {
+      var output = {};
+
+      var breakfast = 
+        static.build_event(result.itinerary.breakfast[0]);
+      var lunch = 
+        static.build_event(result.itinerary.lunch[0]);
+      var dinner = 
+        static.build_event(result.itinerary.dinner[0]);
+      var morning = 
+        static.build_events(result.itinerary.morning[0].event);
+      var afternoon = 
+        static.build_events(result.itinerary.afternoon[0].event);
+      var evening = 
+        static.build_events(result.itinerary.evening[0].event);
+
+      console.log(morning);
+      console.log(afternoon);
+      console.log(evening);
+      output.breakfast = breakfast;
+      output.lunch = lunch;
+      output.dinner = dinner;
+      output.morning = morning;
+      output.afternoon = afternoon;
+      output.evening = evening;
+
+      res.render('itinerary', output);
+    }
+  });
 }

@@ -1,5 +1,6 @@
 html
   head
+    link(href='/css/itinerary.css' rel='stylesheet')
     link(href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css', rel='stylesheet')
   div(class="background-image")
   style body {background-image:url('https://newevolutiondesigns.com/images/freebies/city-wallpaper-18.jpg');
@@ -32,11 +33,17 @@ html
                 if itineraries
                   table.table.table-condensed.table-hover
                     tr
-                      td= 'Date'
+                      td(style='padding-left: 2.7em;') Date
                       td= 'City'
                     each itinerary in itineraries
                       tr
-                        td= itinerary[2]
+                        td
+                          form.slim-row(action='/itinerary', method='post')
+                            input(type='hidden', value= user.id, name='user_id')
+                            input(type='hidden', value= itinerary[0], name='itinerary_id')
+                            button.btn.btn-link(type='submit')
+                              span.glyphicon.glyphicon-share-alt
+                            label.slim-label= itinerary[2]
                         td= itinerary[1]
             br
             p Your friends who use itinerary:

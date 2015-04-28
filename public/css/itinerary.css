@@ -41,3 +41,11 @@
   text-align: center;
   border-radius: 5px;
 }
+
+.slim-label {
+  font-weight: 500;
+}
+
+.header-offset {
+  padding-left: 2.7em;
+}

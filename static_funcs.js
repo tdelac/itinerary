@@ -188,6 +188,33 @@ pretty_date = function(date) {
   return d+' '+m+' '+y;
 }
 
+build_event = function(input) {
+  var event = []
+
+  event[0] = input.name;
+  event[1] = input.stars;
+  event[2] = input.address;
+  event[3] = input.open;
+  event[4] = input.close;
+  event[5] = input.lat;
+  event[6] = input.long;
+  event[7] = input.url;
+
+  return event;
+}
+
+build_events = function(input) {
+  var result = [];
+
+  if (input) {
+    console.log(input);
+    for (var i = 0; i < input.length; ++i) {
+      result[i] = build_event(input[i]);
+    }
+  }
+  return result;
+}
+
 module.exports = {
   array_deep_copy: array_deep_copy,
   rand: rand, 
@@ -197,5 +224,7 @@ module.exports = {
   rand_unique_event: rand_unique_event,
   closest_unique_set: closest_unique_set,
   xml_of_itinerary: xml_of_itinerary,
-  pretty_date: pretty_date
+  pretty_date: pretty_date,
+  build_event: build_event,
+  build_events: build_events
 }
