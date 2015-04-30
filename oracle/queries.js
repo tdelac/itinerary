@@ -228,7 +228,7 @@ module.exports = {
   },
 
   get_itinerary: function(user_id, itinerary_id) {
-    return ("SELECT SYS.XMLType.getStringVal(itinerary_data) "
+    return ("SELECT itinerary_date, city, SYS.XMLType.getStringVal(itinerary_data) AS xml "
             + "FROM itinerary "
             + "WHERE user_id = " + user_id + " AND itinerary_id = " + itinerary_id);
   }

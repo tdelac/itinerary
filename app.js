@@ -645,7 +645,9 @@ var render_account = function(res, db_out) {
 }
 
 var render_itinerary_display = function(res, db_out) {
-  var xml = db_out.rows,
+  var xml = db_out.rows[0][2], 
+      city = db_out.rows[0][1],
+      date = static.pretty_date(db_out.rows[0][0]),
       xml_parser = new xml2js.Parser();
 
   xml_parser.parseString(xml, function(err, result) {
@@ -670,9 +672,8 @@ var render_itinerary_display = function(res, db_out) {
       var evening = 
         static.build_events(result.itinerary.evening[0].event);
 
-      console.log(morning);
-      console.log(afternoon);
-      console.log(evening);
+      output.city = city;
+      output.date = date;
       output.breakfast = breakfast;
       output.lunch = lunch;
       output.dinner = dinner;

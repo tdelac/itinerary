@@ -5,14 +5,20 @@ exports.get_url = function(yelp, term, location, callback) {
       if (data) {
         if (data.businesses) {
           if (data.businesses[0]) {
-            callback(data.businesses[0].url)
+            callback(data.businesses[0].url);
             return;
           }
           console.log("No businesses found!");
+          callback("bogus");
+          return;
         }
         console.log("Businesses array corrupted!");
+        callback("bogus");
+        return;
       }
       console.log("Data wasn't even returned...");
+      callback("bogus");
+      return;
     }
   });
 }

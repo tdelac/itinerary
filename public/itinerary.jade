@@ -1,11 +1,17 @@
 html
   head
+    meta(name="viewport" content="initial-scale=1.0, user-scalable=no")
+    meta(charset="utf-8")
+    style.
+      html, body, #map-canvas {height:100%;margin:0px;padding:0px;}
+      #panel {position: absolute;top: 5px;left: 50%;margin-left: -180px;z-index: 5;background-color: #fff;padding: 5px; border: 1px solid #999;}
+
     link(href='/css/itinerary.css' rel='stylesheet')
     link(href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css', rel='stylesheet')
 
     script(src="https://maps.googleapis.com/maps/api/js")
     script(type="text/javascript").
-      
+
       var city_latlang = {'Las Vegas': new google.maps.LatLng(36.169941, -115.139830) , 'Phoenix':new google.maps.LatLng(33.448377, -112.074037) , 'Madison':new google.maps.LatLng(43.073052, -89.401230) , 'Urbana':new google.maps.LatLng(40.110588, -88.207270) , 'Champaign':new google.maps.LatLng(40.116420, -88.243383) , 'Charlotte':new google.maps.LatLng(35.227087, -80.843127) , 'Pittsburgh':new google.maps.LatLng(40.440625, -79.995886) }
       var city =!{JSON.stringify(city)};
       var breakfast_data =!{JSON.stringify(breakfast)};
@@ -121,8 +127,10 @@ html
       div.jumbotron
         if city
           div(id="map-canvas" style="float:left;width:35%;height:35%;")
-        h1.text-center Itinerary for City
-        div
+        h1.text-center Itinerary for #{city} on #{date}
+        div.text-center
+          div
+            br
             block content
               if morning
                 p Morning
