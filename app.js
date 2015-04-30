@@ -217,7 +217,7 @@ var process_itinerary_display = function(req, res) {
   var sql = 
     queries.get_itinerary(user_id, itinerary_id);
 
-  console.log(sql);
+  console.log(1);
 
   db(sql, res, render_itinerary_display);
 }
@@ -243,7 +243,7 @@ var process_cityform_post = function(req, res) {
       queries.insert_new_itinerary(req.user.id, 
           glbl_dict.output.city, formatted_date, itinerary_xml);
 
-    console.log(sql);
+    console.log(2);
 
     db(sql, res, render_form_after_save);
     return;
@@ -377,8 +377,8 @@ var process_cityform_post = function(req, res) {
     var citysql = "'" + city + "'";
 
     var sql = 
-      queries.get_breakfast_by_stars_weighted
-        (citysql, glbl_dict.day, RAND_RESTAURANT);
+      queries.get_breakfast_by_stars_weighted_utility
+        (citysql, glbl_dict.day, RAND_RESTAURANT, 5, 3.5);
 
     /* Setup the global itinerary object */
     glbl_dict.city = city;
@@ -386,7 +386,7 @@ var process_cityform_post = function(req, res) {
     glbl_dict.num_evening = Math.ceil((num_landmarks - glbl_dict.num_morning) / 4);
     glbl_dict.num_afternoon = 
       num_landmarks - glbl_dict.num_morning - glbl_dict.num_evening;
-
+    console.log(3);
     db(sql, res, process_breakfast);
   }
 }
@@ -397,7 +397,7 @@ process_account_get = function(req, res) {
   
   var sql = 
     queries.get_itineraries_given_user(req.user.id);
-
+  console.log(4);
   db(sql, res, render_account);
 }
 
@@ -411,6 +411,7 @@ var process_cityform_data = function(res, db_out) {
   var locations = db_out.rows;
 
   var sql = queries.get_closest_business(latitude, longitude);
+  console.log(5);
   db(sql, res, make_new_itinerary);
 }
 
@@ -429,9 +430,9 @@ var process_breakfast = function(res, db_out) {
     }
 
     var sql = 
-      queries.get_lunch_by_stars_weighted
-        ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT);
-
+      queries.get_lunch_by_stars_weighted_utility
+        ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT, 5, 3.5);
+    console.log(6);
     db(sql, res, process_lunch);
   });
 }
@@ -456,9 +457,9 @@ var process_lunch = function(res, db_out) {
     }
 
     var sql = 
-      queries.get_dinner_by_stars_weighted
-        ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT);
-
+      queries.get_dinner_by_stars_weighted_utility
+        ("'" + glbl_dict.city + "'", glbl_dict.day, RAND_RESTAURANT, 5, 3.5);
+    console.log(7);
     db(sql, res, process_dinner);
   });
 }
@@ -484,14 +485,16 @@ var process_dinner = function(res, db_out) {
 
     // Anchor these events to lunch
     var sql = 
-      queries.get_morning_landmark_by_stars_dist_weighted(
+      queries.get_morning_landmark_by_stars_dist_weighted_utility(
           "'" + glbl_dict.city + "'" 
         , glbl_dict.day 
         , glbl_dict.num_morning * RAND_BUFFER
         , glbl_dict.output.lunch[5] // lat
         , glbl_dict.output.lunch[6] // long
+        , 5
+        , 3.5
       );
-
+    console.log(8);
     db(sql, res, process_morning_landmarks);
   });
 }
@@ -501,14 +504,16 @@ var process_morning_landmarks = function(res, db_out) {
   glbl_dict.morning_landmarks = db_out.rows;
   
   var sql = 
-    queries.get_afternoon_landmark_by_stars_dist_weighted(
+    queries.get_afternoon_landmark_by_stars_dist_weighted_utility(
         "'" + glbl_dict.city + "'"
       , glbl_dict.day
       , glbl_dict.num_afternoon * RAND_BUFFER
       , glbl_dict.output.lunch[5] // lat
       , glbl_dict.output.lunch[6] // long
+      , 5
+      , 3.5
     );
-
+  console.log(9);
   db(sql, res, process_afternoon_landmarks);
 }
 
@@ -517,14 +522,16 @@ var process_afternoon_landmarks = function(res, db_out) {
   glbl_dict.afternoon_landmarks = db_out.rows;
   
   var sql = 
-    queries.get_evening_landmark_by_stars_dist_weighted(
+    queries.get_evening_landmark_by_stars_dist_weighted_utility(
         "'" + glbl_dict.city + "'"
       , glbl_dict.day
       , glbl_dict.num_evening * RAND_BUFFER
       , glbl_dict.output.dinner[5]
       , glbl_dict.output.dinner[6]
+      , 5
+      , 3.5
     );
-
+  console.log(10);
   db(sql, res, make_new_itinerary);
 }
 
